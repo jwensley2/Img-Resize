@@ -1,6 +1,28 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
+ * Copyright (C) 2011 by Joseph Wensley
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+/**
  * Img Resize Plugin
  *
  * @package		ExpressionEngine
@@ -8,10 +30,8 @@
  * @category	Plugin
  * @author		Joseph Wensley
  * @link		http://josephwensley.com
- * @copyright	Joseph Wensley, 28 October, 2011
  * @version		1.0
  */
-
 
 $plugin_info = array(
 	'pi_name'		=> 'Img Resize',
@@ -379,19 +399,19 @@ class Img_resize {
 ?>
 Requirements
 ============
-ExpressionEngine 2.x
-PHP 5+
-GD2
+- ExpressionEngine 2.x
+- PHP 5+
+- GD2
 
 Parameters
 ==========
-src: 							Path to the image can be a full or relative (to the index.php) system path or a local url
-dir (optional): 				Relative path to where you want resized images to be stored. Default is /images/resized/
-width and/or height:			Absolute width or height to resize to
-max_width and/or max_height:	Maximum width or height to resize to
-alt (optional):					Alt text for the img tag
-quality (optional):				The quality of the resized image between 0-100. Default is 100.
-just_url (optional):			Set this to on to only return the URL to the image
+**src:** Path to the image can be a full or relative (to the index.php) system path or a local url  
+**dir (optional):** Relative path to where you want resized images to be stored. Default is /images/resized/  
+**width and/or height:** Absolute width or height to resize to  
+**max_width and/or max_height:** Maximum width or height to resize to  
+**alt (optional):** Alt text for the img tag  
+**quality (optional):** The quality of the resized image between 0-100. Default is 100.  
+**just_url (optional):** Set this to on to only return the URL to the image
 
 Example Usage
 =============
