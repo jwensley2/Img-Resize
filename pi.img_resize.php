@@ -9,10 +9,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,7 +35,7 @@
 
 $plugin_info = array(
 	'pi_name'		=> 'Img Resize',
-	'pi_version'	=> '1.0',
+	'pi_version'	=> '1.0.1',
 	'pi_author'		=> 'Joseph Wensley',
 	'pi_author_url'	=> 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
@@ -46,24 +46,24 @@ $plugin_info = array(
 class Img_resize {
 
 	public	$return_data;
-	
+
 	// Defaults
 	public	$cache_dir = '/images/resized/';
-    
+
 	/**
 	 * Constructor
 	 */
 	public function __construct()
 	{
 		$this->EE =& get_instance();
-		
+
 		if (extension_loaded('gd2') AND function_exists('gd_info'))
 		{
-		    $this->EE->TMPL->log_item("Img Resize: GD must be installed to use Img Resize");
+			$this->EE->TMPL->log_item("Img Resize: GD must be installed to use Img Resize");
 			$this->return_data = '';
 			return;
 		}
-		
+
 		// Retrieve the parameters
 		$src		= $this->EE->TMPL->fetch_param('src');
 		$height		= $this->EE->TMPL->fetch_param('height');
@@ -74,30 +74,30 @@ class Img_resize {
 		$just_url	= $this->EE->TMPL->fetch_param('just_url') ? TRUE : FALSE;
 		$cache		= $this->EE->TMPL->fetch_param('cache') == 'off' ? FALSE : TRUE;
 		$cache_dir	= $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
-		
+
 		// Tag Attributes
 		$attr_alt	= $this->EE->TMPL->fetch_param('alt');
 		$attr_title = $this->EE->TMPL->fetch_param('title');
 		$attr_class = $this->EE->TMPL->fetch_param('class');
 		$attr_id	= $this->EE->TMPL->fetch_param('id');
-		
+
 		if ( ! $src)
 		{
 			$this->EE->TMPL->log_item("Img Resize: No source specified");
 			$this->return_data = '';
 			return;
 		}
-		
+
 		if ( ! $height AND ! $width AND ! $max_height AND ! $max_width)
 		{
 			$this->EE->TMPL->log_item("Img Resize: No width or height specified");
 			$this->return_data = '';
 			return;
 		}
-		
+
 		list($src_path_full, $src_path_rel, $src_filename, $src_extension, $is_remote) = $this->get_path_info($src);
 		unset($src);
-		
+
 		// Try and read the image
 		if (fopen($src_path_full, 'r'))
 		{
@@ -109,7 +109,7 @@ class Img_resize {
 			$this->return_data = '';
 			return;
 		}
-		
+
 		if ($max_width OR $max_height)
 		{
 			$d = $this->calculate_dimensions($max_width, $max_height, $src_width, $src_height, TRUE);
@@ -118,30 +118,30 @@ class Img_resize {
 		{
 			$d = $this->calculate_dimensions($width, $height, $src_width, $src_height);
 		}
-		
+
 		// Determine the url and path to the cache folder
 		$base_url			= 'http://'.$_SERVER['SERVER_NAME'];
 		$cache_url			= $base_url.$cache_dir;
 		$cache_path			= FCPATH.$cache_dir;
-		
+
 		$out_filename = "{$src_filename}_{$d['out_w']}_{$d['out_h']}.$src_extension";
-		
+
 		$out_dir	= $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel);
 		$out_path	= $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel.'/'.$out_filename);
 		$out_url	= $this->EE->functions->remove_double_slashes($cache_url.$src_path_rel.'/'.$out_filename);
-		
-		//C heck if the destination directory exists, create it if it doesn't
+
+		// Check if the destination directory exists, create it if it doesn't
 		if( ! is_dir($out_dir))
 		{
 			mkdir($out_dir, DIR_WRITE_MODE, TRUE); // This does recursive creation in PHP 5.0 and up
 		}
-		
+
 		$cached = $this->is_cached($out_path, $src_path_full, $is_remote);
-		
+
 		if ( ! $cached)
 		{
 			$out_image = imagecreatetruecolor($d['out_w'], $d['out_h']);
-			
+
 			if ($image_type == IMAGETYPE_JPEG)
 			{
 				$src_image = imagecreatefromjpeg($src_path_full);
@@ -149,15 +149,15 @@ class Img_resize {
 			elseif ($image_type = IMAGETYPE_PNG)
 			{
 				$src_image = imagecreatefrompng($src_path_full);
-				
+
 				// Make transparency work
 				imagealphablending($out_image, FALSE);
 				imagesavealpha($out_image, TRUE);
 			}
-			
+
 			// Copy and resample the source image to the destination image, cropping and resizing at the same time
-			imagecopyresampled($out_image, $src_image, $d['out_x'], $d['out_y'], 0, 0, $d['out_w'], $d['out_h'], $d['src_w'], $d['src_h']);
-			
+			imagecopyresampled($out_image, $src_image, $d['out_x'], $d['out_y'], 0, 0, $d['copy_w'], $d['copy_h'], $d['src_w'], $d['src_h']);
+
 			// Output the new file using the correct function for the image type
 			if ($image_type == IMAGETYPE_JPEG)
 			{
@@ -168,7 +168,7 @@ class Img_resize {
 				imagepng($out_image, $out_path);
 			}
 		}
-		
+
 		if ($just_url == TRUE)
 		{
 			$this->return_data = $out_url;
@@ -183,18 +183,18 @@ class Img_resize {
 			$attributes['title']	= $attr_title;
 			$attributes['class']	= $attr_class;
 			$attributes['id']		= $attr_id;
-			
+
 			$this->return_data = $this->build_tag($attributes);
 			return;
 		}
 	}
-	
+
 	// ----------------------------------------------------------------
-	
+
 	private function build_tag($attributes)
 	{
 		$tag = '<img ';
-		
+
 		foreach ($attributes AS $key => $value)
 		{
 			if ( ! empty($value))
@@ -202,14 +202,14 @@ class Img_resize {
 				$tag .= "{$key}=\"$value\" ";
 			}
 		}
-		
+
 		$tag .= '>';
-		
+
 		return $tag;
 	}
-	
+
 	// ----------------------------------------------------------------
-	
+
 	private function is_cached($out_path, $src_path, $is_remote = FALSE)
 	{
 		if (file_exists($out_path) AND $is_remote)
@@ -220,34 +220,37 @@ class Img_resize {
 		{
 			return TRUE;
 		}
-		
+
 		return FALSE;
 	}
-	
+
 	// ----------------------------------------------------------------
-	
+
 	/**
 	 * Calculate the size the image will be resized to
 	 *
-	 * @param string $out_width 
-	 * @param string $out_height 
-	 * @param string $src_width 
-	 * @param string $src_height 
-	 * @param string $max 
+	 * @param string $out_width
+	 * @param string $out_height
+	 * @param string $src_width
+	 * @param string $src_height
+	 * @param string $max
 	 * @return void
 	 * @author Joseph Wensley
 	 */
-	
+
 	private function calculate_dimensions($out_w, $out_h, $src_w, $src_h, $max = FALSE)
 	{
+		$copy_w = $out_w;
+		$copy_h = $out_h;
+
 		if ($out_w AND $out_h)
 		{
 			$diff_w = abs($src_w - $out_w);
 			$diff_h = abs($src_h - $out_h);
-			
+
 			$r1 = ($src_w / $out_w); // width to width ratio
 			$r2 = ($src_h / $out_h); // height to height ratio
-			
+
 			if ($src_w <= $out_w AND $src_h <= $out_h AND $max == TRUE)
 			{
 				$out_w = $src_w;
@@ -273,22 +276,20 @@ class Img_resize {
 					$out_x = 0;
 				}
 			}
-			else
+			elseif ($diff_w > $diff_h)
 			{
 				if ($r1 > $r2)
 				{
-					$out_w_o = $out_w;
-					$out_w = ($src_w / $r2);
+					$copy_w = ($src_w / $r2);
 
-					$out_x = ($out_w_o - $out_w) / 2;
+					$out_x = ($out_w_o - $copy_w) / 2;
 					$out_y = 0;
 				}
 				else
 				{
-					$out_w_o = $out_w;
-					$out_w = ($src_w / $r1);
+					$copy_w = ($src_w / $r1);
 
-					$out_x = ($out_w_o - $out_w) / 2;
+					$out_x = ($out_w_o - $copy_w) / 2;
 					$out_y = 0;
 				}
 			}
@@ -307,6 +308,9 @@ class Img_resize {
 				$r = $src_w / $out_w;
 				$out_h = $src_h / $r;
 				$src_x = $src_y = $out_x = $out_y = 0;
+
+				$copy_w = $src_w / $r;
+				$copy_h = $src_h / $r;
 			}
 		}
 		elseif ($out_h)
@@ -322,40 +326,45 @@ class Img_resize {
 				$r = $src_h / $out_h;
 				$out_w = $src_w / $r;
 				$src_x = $src_y = $out_x = $out_y = 0;
+
+				$copy_w = $src_w / $r;
+				$copy_h = $src_h / $r;
 			}
-		}	
-		
-		$dimensions['out_x'] = $out_x;
-		$dimensions['out_y'] = $out_y;
-		$dimensions['src_x'] = $src_x;
-		$dimensions['src_y'] = $src_y;
-		$dimensions['out_w'] = floor($out_w);
-		$dimensions['out_h'] = floor($out_h);
-		$dimensions['src_w'] = $src_w;
-		$dimensions['src_h'] = $src_h;
-		
+		}
+
+		$dimensions['out_x']	= $out_x;
+		$dimensions['out_y']	= $out_y;
+		$dimensions['src_x']	= $src_x;
+		$dimensions['src_y']	= $src_y;
+		$dimensions['out_w']	= floor($out_w);
+		$dimensions['out_h']	= floor($out_h);
+		$dimensions['copy_w']	= floor($copy_w);
+		$dimensions['copy_h']	= floor($copy_h);
+		$dimensions['src_w']	= $src_w;
+		$dimensions['src_h']	= $src_h;
+
 		return $dimensions;
 	}
-	
+
 	// ----------------------------------------------------------------
-	
+
 	/**
 	 * Determine the full and relative paths to the image
 	 *
-	 * @param string $src 
+	 * @param string $src
 	 * @return void
 	 * @author Joseph Wensley
 	 */
-	
+
 	private function get_path_info($src)
 	{
 		$pattern = "/(((http|ftp|https):\/\/){1}([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)+([\S,:\/\.\?=a-zA-Z0-9_-]+))/is";
-		
+
 		if (preg_match($pattern, $src, $matches))
 		{
 			$url_parts	= parse_url($src);
 			$url_path	= $url_parts['path'];
-			
+
 			$path_parts		= pathinfo($url_path);
 			$filename		= $path_parts['filename'];
 			$extension		= $path_parts['extension'];
@@ -366,7 +375,7 @@ class Img_resize {
 		else
 		{
 			$is_remote = FALSE;
-			
+
 			if (stripos($src, FCPATH) === FALSE)
 			{
 				$parts				= pathinfo($src);
@@ -384,12 +393,12 @@ class Img_resize {
 				$full_path			= $src;
 			}
 		}
-		
+
 		return array($full_path, $relative_path, $filename, $extension, $is_remote);
 	}
-	
+
 	// ----------------------------------------------------------------
-	
+
 	/**
 	 * Plugin Usage
 	 */
@@ -405,28 +414,29 @@ Requirements
 
 Parameters
 ==========
-**src:** Path to the image can be a full or relative (to the index.php) system path or a local url  
-**dir (optional):** Relative path to where you want resized images to be stored. Default is /images/resized/  
-**width and/or height:** Absolute width or height to resize to  
-**max_width and/or max_height:** Maximum width or height to resize to  
-**alt (optional):** Alt text for the img tag  
-**quality (optional):** The quality of the resized image between 0-100. Default is 100.  
+**src:** Path to the image can be a full or relative (to the index.php) system path or a local url
+**dir (optional):** Relative path to where you want resized images to be stored. Default is /images/resized/
+**width and/or height:** Absolute width or height to resize to
+**max_width and/or max_height:** Maximum width or height to resize to
+**alt (optional):** Alt text for the img tag
+**quality (optional):** The quality of the resized image between 0-100. Default is 100.
 **just_url (optional):** Set this to on to only return the URL to the image
 
 Example Usage
 =============
-	
+
 	{exp:img_resize src="/assets/img/imagename.jpg" width="100" height="100" alt="Some alt text"}
 	// Outputs
 	<img src="http://domain.com/images/resized/assets/img/imagename_100x100.jpg" width="100" height="100" alt="Some alt text">
-	
+
 	{exp:img_resize src="/assets/img/imagename.jpg" width="100" height="100" just_url="yes"}
 	// Outputs
 	http://domain.com/images/resized/assets/img/imagename_100x100.jpg
 
 Changelog
 =========
-1.0 - Initial Release
+1.0		- Initial Release
+1.0.1	- Bugfixes
 <?php
 		$buffer = ob_get_contents();
 		ob_end_clean();
