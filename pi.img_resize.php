@@ -261,18 +261,16 @@ class Img_resize {
 			{
 				if ($r1 > $r2)
 				{
-					$out_h_o = $out_h;
-					$out_h = ($src_h / $r2);
+					$copy_h = ($src_h / $r2);
 
-					$out_y = ($out_h_o - $out_h) / 2;
+					$out_y = ($out_h - $out_h) / 2;
 					$out_x = 0;
 				}
 				else
 				{
-					$out_h_o = $out_h;
-					$out_h = ($src_h / $r1);
+					$copy_h = ($src_h / $r1);
 
-					$out_y = ($out_h_o - $out_h) / 2;
+					$out_y = ($out_h - $out_h) / 2;
 					$out_x = 0;
 				}
 			}
@@ -282,17 +280,22 @@ class Img_resize {
 				{
 					$copy_w = ($src_w / $r2);
 
-					$out_x = ($out_w_o - $copy_w) / 2;
+					$out_x = ($out_w - $copy_w) / 2;
 					$out_y = 0;
 				}
 				else
 				{
 					$copy_w = ($src_w / $r1);
 
-					$out_x = ($out_w_o - $copy_w) / 2;
+					$out_x = ($out_w - $copy_w) / 2;
 					$out_y = 0;
 				}
 			}
+			else
+			{
+				$out_x = $out_y = 0;
+			}
+
 			$src_x = $src_y = 0;
 		}
 		elseif ($out_w)
