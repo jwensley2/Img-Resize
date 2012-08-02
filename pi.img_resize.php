@@ -25,30 +25,30 @@
 /**
  * Img Resize Plugin
  *
- * @package		ExpressionEngine
- * @subpackage	Addons
- * @category	Plugin
- * @author		Joseph Wensley
- * @link		http://josephwensley.com
- * @version		1.0
+ * @package    ExpressionEngine
+ * @subpackage Addons
+ * @category   Plugin
+ * @author     Joseph Wensley
+ * @link       http://josephwensley.com
+ * @version    1.0.2
  */
 
 $plugin_info = array(
-	'pi_name'		=> 'Img Resize',
-	'pi_version'	=> '1.0.1',
-	'pi_author'		=> 'Joseph Wensley',
-	'pi_author_url'	=> 'http://josephwensley.com',
+	'pi_name'       => 'Img Resize',
+	'pi_version'    => '1.0.2',
+	'pi_author'     => 'Joseph Wensley',
+	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
-	'pi_usage'		=> Img_resize::usage()
+	'pi_usage'      => Img_resize::usage()
 );
 
 
 class Img_resize {
 
-	public	$return_data;
+	public $return_data;
 
 	// Defaults
-	public	$cache_dir = '/images/resized/';
+	public $cache_dir = '/images/resized/';
 
 	/**
 	 * Constructor
@@ -65,21 +65,21 @@ class Img_resize {
 		}
 
 		// Retrieve the parameters
-		$src		= $this->EE->TMPL->fetch_param('src');
-		$height		= $this->EE->TMPL->fetch_param('height');
-		$width		= $this->EE->TMPL->fetch_param('width');
-		$max_height	= $this->EE->TMPL->fetch_param('max_height');
-		$max_width	= $this->EE->TMPL->fetch_param('max_width');
-		$quality	= $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
-		$just_url	= $this->EE->TMPL->fetch_param('just_url') ? TRUE : FALSE;
-		$cache		= $this->EE->TMPL->fetch_param('cache') == 'off' ? FALSE : TRUE;
-		$cache_dir	= $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
+		$src        = $this->EE->TMPL->fetch_param('src');
+		$height     = $this->EE->TMPL->fetch_param('height');
+		$width      = $this->EE->TMPL->fetch_param('width');
+		$max_height = $this->EE->TMPL->fetch_param('max_height');
+		$max_width  = $this->EE->TMPL->fetch_param('max_width');
+		$quality    = $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
+		$just_url   = $this->EE->TMPL->fetch_param('just_url') ? TRUE : FALSE;
+		$cache      = $this->EE->TMPL->fetch_param('cache') == 'off' ? FALSE : TRUE;
+		$cache_dir  = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
 
 		// Tag Attributes
-		$attr_alt	= $this->EE->TMPL->fetch_param('alt');
+		$attr_alt   = $this->EE->TMPL->fetch_param('alt');
 		$attr_title = $this->EE->TMPL->fetch_param('title');
 		$attr_class = $this->EE->TMPL->fetch_param('class');
-		$attr_id	= $this->EE->TMPL->fetch_param('id');
+		$attr_id    = $this->EE->TMPL->fetch_param('id');
 
 		if ( ! $src)
 		{
@@ -120,15 +120,15 @@ class Img_resize {
 		}
 
 		// Determine the url and path to the cache folder
-		$base_url			= 'http://'.$_SERVER['SERVER_NAME'];
-		$cache_url			= $base_url.$cache_dir;
-		$cache_path			= FCPATH.$cache_dir;
+		$base_url   = 'http://'.$_SERVER['SERVER_NAME'];
+		$cache_url  = $base_url.$cache_dir;
+		$cache_path = FCPATH.$cache_dir;
 
 		$out_filename = "{$src_filename}_{$d['out_w']}_{$d['out_h']}.$src_extension";
 
-		$out_dir	= $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel);
-		$out_path	= $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel.'/'.$out_filename);
-		$out_url	= $this->EE->functions->remove_double_slashes($cache_url.$src_path_rel.'/'.$out_filename);
+		$out_dir  = $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel);
+		$out_path = $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel.'/'.$out_filename);
+		$out_url  = $this->EE->functions->remove_double_slashes($cache_url.$src_path_rel.'/'.$out_filename);
 
 		// Check if the destination directory exists, create it if it doesn't
 		if( ! is_dir($out_dir))
@@ -138,7 +138,7 @@ class Img_resize {
 
 		$cached = $this->is_cached($out_path, $src_path_full, $is_remote);
 
-		if ( ! $cached)
+		if ( ! $cached OR $cache === FALSE)
 		{
 			$out_image = imagecreatetruecolor($d['out_w'], $d['out_h']);
 
@@ -351,15 +351,15 @@ class Img_resize {
 
 		if (preg_match($pattern, $src, $matches))
 		{
-			$url_parts	= parse_url($src);
-			$url_path	= $url_parts['path'];
+			$url_parts = parse_url($src);
+			$url_path  = $url_parts['path'];
 
-			$path_parts		= pathinfo($url_path);
-			$filename		= $path_parts['filename'];
-			$extension		= $path_parts['extension'];
-			$relative_path	= $path_parts['dirname'];
-			$full_path 		= $src;
-			$is_remote		= TRUE;
+			$path_parts    = pathinfo($url_path);
+			$filename      = $path_parts['filename'];
+			$extension     = $path_parts['extension'];
+			$relative_path = $path_parts['dirname'];
+			$full_path     = $src;
+			$is_remote     = TRUE;
 		}
 		else
 		{
@@ -367,19 +367,19 @@ class Img_resize {
 
 			if (stripos($src, FCPATH) === FALSE)
 			{
-				$parts				= pathinfo($src);
-				$filename			= $parts['filename'];
-				$extension			= $parts['extension'];
-				$relative_path		= $parts['dirname'];
-				$full_path			= FCPATH.$src;
+				$parts         = pathinfo($src);
+				$filename      = $parts['filename'];
+				$extension     = $parts['extension'];
+				$relative_path = $parts['dirname'];
+				$full_path     = FCPATH.$src;
 			}
 			else
 			{
-				$parts				= pathinfo(str_replace(FCPATH, '/', $src));
-				$filename			= $parts['filename'];
-				$extension			= $parts['extension'];
-				$relative_path		= $parts['dirname'];
-				$full_path			= $src;
+				$parts         = pathinfo(str_replace(FCPATH, '/', $src));
+				$filename      = $parts['filename'];
+				$extension     = $parts['extension'];
+				$relative_path = $parts['dirname'];
+				$full_path     = $src;
 			}
 		}
 
@@ -424,8 +424,9 @@ Example Usage
 
 Changelog
 =========
-1.0		- Initial Release
-1.0.1	- Bugfixes
+1.0   - Initial Release
+1.0.1 - Bugfixes
+1.0.2 - Rewrite dimension calculation code
 <?php
 		$buffer = ob_get_contents();
 		ob_end_clean();
