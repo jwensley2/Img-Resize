@@ -176,13 +176,13 @@ class Img_resize {
 		}
 		else
 		{
-			$attributes['src']		= $out_url;
-			$attributes['width']	= $d['out_w'];
-			$attributes['height']	= $d['out_h'];
-			$attributes['alt']		= $attr_alt;
-			$attributes['title']	= $attr_title;
-			$attributes['class']	= $attr_class;
-			$attributes['id']		= $attr_id;
+			$attributes['src']    = $out_url;
+			$attributes['width']  = $d['out_w'];
+			$attributes['height'] = $d['out_h'];
+			$attributes['alt']    = $attr_alt;
+			$attributes['title']  = $attr_title;
+			$attributes['class']  = $attr_class;
+			$attributes['id']     = $attr_id;
 
 			$this->return_data = $this->build_tag($attributes);
 			return;
@@ -240,111 +240,97 @@ class Img_resize {
 
 	private function calculate_dimensions($out_w, $out_h, $src_w, $src_h, $max = FALSE)
 	{
-		$copy_w = $out_w;
-		$copy_h = $out_h;
+		// Set default coordinates
+		$out_x = 0;
+		$out_y = 0;
+		$src_x = 0;
+		$src_y = 0;
 
-		if ($out_w AND $out_h)
+		// Set Default Ratios
+		$rw = 1;
+		$rh = 1;
+
+		// Calculate the resize ratios and missing dimensions
+		if ($out_w AND $out_h) // Crop and Resize
 		{
-			$diff_w = abs($src_w - $out_w);
-			$diff_h = abs($src_h - $out_h);
-
-			$r1 = ($src_w / $out_w); // width to width ratio
-			$r2 = ($src_h / $out_h); // height to height ratio
-
-			if ($src_w <= $out_w AND $src_h <= $out_h AND $max == TRUE)
+			if ($max)
 			{
-				$out_w = $src_w;
-				$out_h = $src_h;
-				$src_x = $src_y = $out_x = $out_y = 0;
+				$out_w = min($src_w, $out_w);
+				$out_h = min($src_h, $out_h);
 			}
-			elseif ($diff_w < $diff_h)
+
+			$rw = ($src_w / $out_w);
+			$rh = ($src_h / $out_h);
+
+			if ($max)
 			{
-				if ($r1 > $r2)
+				if ($rw > $rh)
 				{
-					$copy_h = ($src_h / $r2);
-
-					$out_y = ($out_h - $out_h) / 2;
-					$out_x = 0;
+					$out_h = $out_h / $rw;
 				}
-				else
+				elseif ($rw < $rh)
 				{
-					$copy_h = ($src_h / $r1);
-
-					$out_y = ($out_h - $out_h) / 2;
-					$out_x = 0;
+					$out_w = $out_w / $rh;
 				}
-			}
-			elseif ($diff_w > $diff_h)
-			{
-				if ($r1 > $r2)
-				{
-					$copy_w = ($src_w / $r2);
-
-					$out_x = ($out_w - $copy_w) / 2;
-					$out_y = 0;
-				}
-				else
-				{
-					$copy_w = ($src_w / $r1);
-
-					$out_x = ($out_w - $copy_w) / 2;
-					$out_y = 0;
-				}
-			}
-			else
-			{
-				$out_x = $out_y = 0;
-			}
-
-			$src_x = $src_y = 0;
-		}
-		elseif ($out_w)
-		{
-			if ($src_w <= $out_w AND $max == TRUE)
-			{
-				$out_w = $src_w;
-				$out_h = $src_h;
-				$src_x = $src_y = $out_x = $out_y = 0;
-			}
-			else
-			{
-				$r = $src_w / $out_w;
-				$out_h = $src_h / $r;
-				$src_x = $src_y = $out_x = $out_y = 0;
-
-				$copy_w = $src_w / $r;
-				$copy_h = $src_h / $r;
 			}
 		}
-		elseif ($out_h)
+		elseif ($out_w) // Resize by width
 		{
-			if ($src_h <= $out_h AND $max == TRUE)
+			if ($max AND $out_w >= $src_w)
 			{
 				$out_w = $src_w;
-				$out_h = $src_h;
-				$src_x = $src_y = $out_x = $out_y = 0;
 			}
-			else
-			{
-				$r = $src_h / $out_h;
-				$out_w = $src_w / $r;
-				$src_x = $src_y = $out_x = $out_y = 0;
 
-				$copy_w = $src_w / $r;
-				$copy_h = $src_h / $r;
+			$rw = $rh = ($src_w / $out_w);
+
+			$out_h = ($src_h / $rw); // Calculate the height
+		}
+		elseif ($out_h) // Resize by height
+		{
+			if ($max AND $out_h >= $src_h)
+			{
+				$out_h = $src_h;
 			}
+
+			$rh = $rw = ($src_h / $out_h);
+
+			$out_w = ($src_w / $rh); // Calculate the width
 		}
 
-		$dimensions['out_x']	= $out_x;
-		$dimensions['out_y']	= $out_y;
-		$dimensions['src_x']	= $src_x;
-		$dimensions['src_y']	= $src_y;
-		$dimensions['out_w']	= floor($out_w);
-		$dimensions['out_h']	= floor($out_h);
-		$dimensions['copy_w']	= floor($copy_w);
-		$dimensions['copy_h']	= floor($copy_h);
-		$dimensions['src_w']	= $src_w;
-		$dimensions['src_h']	= $src_h;
+		if ($rw > $rh)
+		{
+			$copy_w = $src_w / $rh;
+			$copy_h = $src_h / $rh;
+		}
+		else
+		{
+			$copy_w = $src_w / $rw;
+			$copy_h = $src_h / $rw;
+		}
+
+		$src_x = ($src_w - $copy_w) / 2;
+		$src_y = ($src_h - $copy_h) / 2;
+
+		if ($rw > $rh)
+		{
+			$out_x = -(($copy_w - $out_w) / 2);
+		}
+
+		if ($rw < $rh)
+		{
+			$out_y = -(($copy_h - $out_h) / 2);
+		}
+
+		$dimensions['out_x']  = $out_x;
+		$dimensions['out_y']  = $out_y;
+		$dimensions['src_x']  = $src_x;
+		$dimensions['src_y']  = $src_y;
+		$dimensions['out_w']  = floor($out_w);
+		$dimensions['out_h']  = floor($out_h);
+		$dimensions['copy_w'] = floor($copy_w);
+		$dimensions['copy_h'] = floor($copy_h);
+		$dimensions['src_w']  = $src_w;
+		$dimensions['src_h']  = $src_h;
 
 		return $dimensions;
 	}
