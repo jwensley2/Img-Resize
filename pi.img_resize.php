@@ -30,7 +30,7 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    1.0.2
+ * @version    1.0.3
  */
 
 $plugin_info = array(
@@ -47,8 +47,15 @@ class Img_resize {
 
 	public $return_data;
 
-	// Defaults
-	public $cache_dir = '/images/resized/';
+	// Parameters
+	private $cache_dir = '/images/resized/';
+	private $quality  = 100;
+	private $sharpen  = FALSE;
+	private $cache    = TRUE;
+	private $just_url = FALSE;
+
+	// Image Properties
+	private $image_type;
 
 	/**
 	 * Constructor
@@ -70,16 +77,18 @@ class Img_resize {
 		$width      = $this->EE->TMPL->fetch_param('width');
 		$max_height = $this->EE->TMPL->fetch_param('max_height');
 		$max_width  = $this->EE->TMPL->fetch_param('max_width');
-		$quality    = $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
-		$just_url   = $this->EE->TMPL->fetch_param('just_url') ? TRUE : FALSE;
-		$cache      = $this->EE->TMPL->fetch_param('cache') == 'off' ? FALSE : TRUE;
-		$cache_dir  = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
+
+		$this->cache_dir = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
+		$this->just_url  = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
+		$this->cache     = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
+		$this->sharpen   = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
+		$this->quality   = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
 
 		// Tag Attributes
-		$attr_alt   = $this->EE->TMPL->fetch_param('alt');
-		$attr_title = $this->EE->TMPL->fetch_param('title');
-		$attr_class = $this->EE->TMPL->fetch_param('class');
-		$attr_id    = $this->EE->TMPL->fetch_param('id');
+		$attr['alt']   = $this->EE->TMPL->fetch_param('alt');
+		$attr['title'] = $this->EE->TMPL->fetch_param('title');
+		$attr['class'] = $this->EE->TMPL->fetch_param('class');
+		$attr['id']    = $this->EE->TMPL->fetch_param('id');
 
 		if ( ! $src)
 		{
@@ -101,7 +110,7 @@ class Img_resize {
 		// Try and read the image
 		if (fopen($src_path_full, 'r'))
 		{
-			list($src_width, $src_height, $image_type) = getimagesize($src_path_full);
+			list($src_width, $src_height, $this->image_type) = getimagesize($src_path_full);
 		}
 		else
 		{
@@ -121,8 +130,8 @@ class Img_resize {
 
 		// Determine the url and path to the cache folder
 		$base_url   = 'http://'.$_SERVER['SERVER_NAME'];
-		$cache_url  = $base_url.$cache_dir;
-		$cache_path = FCPATH.$cache_dir;
+		$cache_url  = $base_url.$this->cache_dir;
+		$cache_path = FCPATH.$this->cache_dir;
 
 		$out_filename = "{$src_filename}_{$d['out_w']}_{$d['out_h']}.$src_extension";
 
@@ -138,58 +147,121 @@ class Img_resize {
 
 		$cached = $this->is_cached($out_path, $src_path_full, $is_remote);
 
-		if ( ! $cached OR $cache === FALSE)
+		if ( ! $cached OR $this->cache === FALSE)
 		{
-			$out_image = imagecreatetruecolor($d['out_w'], $d['out_h']);
-
-			if ($image_type == IMAGETYPE_JPEG)
+			if (class_exists("Imagick"))
 			{
-				$src_image = imagecreatefromjpeg($src_path_full);
+				$this->resize_using_imagick($d, $src_path_full, $out_path);
 			}
-			elseif ($image_type = IMAGETYPE_PNG)
+			else
 			{
-				$src_image = imagecreatefrompng($src_path_full);
-
-				// Make transparency work
-				imagealphablending($out_image, FALSE);
-				imagesavealpha($out_image, TRUE);
-			}
-
-			// Copy and resample the source image to the destination image, cropping and resizing at the same time
-			imagecopyresampled($out_image, $src_image, $d['out_x'], $d['out_y'], 0, 0, $d['copy_w'], $d['copy_h'], $d['src_w'], $d['src_h']);
-
-			// Output the new file using the correct function for the image type
-			if ($image_type == IMAGETYPE_JPEG)
-			{
-				imagejpeg($out_image, $out_path, $quality);
-			}
-			elseif ($image_type = IMAGETYPE_PNG)
-			{
-				imagepng($out_image, $out_path);
+				$this->resize_using_gd($d, $src_path_full, $out_path);
 			}
 		}
 
-		if ($just_url == TRUE)
+		if ($this->just_url == TRUE)
 		{
 			$this->return_data = $out_url;
 			return;
 		}
 		else
 		{
+			$attributes = $attr;
+
 			$attributes['src']    = $out_url;
 			$attributes['width']  = $d['out_w'];
 			$attributes['height'] = $d['out_h'];
-			$attributes['alt']    = $attr_alt;
-			$attributes['title']  = $attr_title;
-			$attributes['class']  = $attr_class;
-			$attributes['id']     = $attr_id;
 
 			$this->return_data = $this->build_tag($attributes);
 			return;
 		}
 	}
 
-	// ----------------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Resize the image using GD
+	 *
+	 * @return void
+	 * @author Joseph Wensley
+	 */
+
+	public function resize_using_gd($d, $image_path, $out_path)
+	{
+		$out_image = imagecreatetruecolor($d['out_w'], $d['out_h']);
+
+		if ($this->image_type == IMAGETYPE_JPEG)
+		{
+			$src_image = imagecreatefromjpeg($image_path);
+		}
+		elseif ($this->image_type = IMAGETYPE_PNG)
+		{
+			$src_image = imagecreatefrompng($image_path);
+
+			// Make transparency work
+			imagealphablending($out_image, FALSE);
+			imagesavealpha($out_image, TRUE);
+		}
+
+		// Copy and resample the source image to the destination image, cropping and resizing at the same time
+		imagecopyresampled($out_image, $src_image, $d['out_x'], $d['out_y'], 0, 0, $d['copy_w'], $d['copy_h'], $d['src_w'], $d['src_h']);
+
+		// Sharpen the image if enabled
+		if ($this->sharpen === TRUE)
+		{
+			$this->imagesharpen($out_image);
+		}
+
+		// Output the new file using the correct function for the image type
+		if ($this->image_type == IMAGETYPE_JPEG)
+		{
+			imagejpeg($out_image, $out_path, $this->quality);
+		}
+		elseif ($this->image_type = IMAGETYPE_PNG)
+		{
+			imagepng($out_image, $out_path);
+		}
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Resize the image using Imagick
+	 *
+	 * @return void
+	 * @author Joseph Wensley
+	 */
+
+	public function resize_using_imagick($d, $image_path, $out_path)
+	{
+		$image = new Imagick($image_path);
+
+		if ($d['crop'])
+		{
+			$image->cropThumbnailImage($d['out_w'], $d['out_h']);
+		}
+		else
+		{
+			$image->thumbnailImage($d['out_w'], $d['out_h'], FALSE);
+		}
+
+		// Sharpen the image if enabled
+		if ($this->sharpen)
+		{
+			$image->sharpenImage(1.5, 1);
+		}
+
+		$image->writeImage($out_path);
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Build the HTML tag
+	 *
+	 * @return string
+	 * @author Joseph Wensley
+	 */
 
 	private function build_tag($attributes)
 	{
@@ -208,7 +280,14 @@ class Img_resize {
 		return $tag;
 	}
 
-	// ----------------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Check to see if there is a cached version of the image
+	 *
+	 * @return bool
+	 * @author Joseph Wensley
+	 */
 
 	private function is_cached($out_path, $src_path, $is_remote = FALSE)
 	{
@@ -224,7 +303,7 @@ class Img_resize {
 		return FALSE;
 	}
 
-	// ----------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Calculate the size the image will be resized to
@@ -240,6 +319,8 @@ class Img_resize {
 
 	private function calculate_dimensions($out_w, $out_h, $src_w, $src_h, $max = FALSE)
 	{
+		$crop = FALSE;
+
 		// Set default coordinates
 		$out_x = 0;
 		$out_y = 0;
@@ -273,6 +354,8 @@ class Img_resize {
 					$out_w = $out_w / $rh;
 				}
 			}
+
+			$crop = TRUE;
 		}
 		elseif ($out_w) // Resize by width
 		{
@@ -331,11 +414,12 @@ class Img_resize {
 		$dimensions['copy_h'] = floor($copy_h);
 		$dimensions['src_w']  = $src_w;
 		$dimensions['src_h']  = $src_h;
+		$dimensions['crop']   = $crop;
 
 		return $dimensions;
 	}
 
-	// ----------------------------------------------------------------
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Determine the full and relative paths to the image
@@ -365,17 +449,21 @@ class Img_resize {
 		{
 			$is_remote = FALSE;
 
-			if (stripos($src, FCPATH) === FALSE)
+			// Trim the trailing slashes off
+			$src    = rtrim($src, '\\/');
+			$fcpath = rtrim(FCPATH, '\\/');
+
+			if (stripos($src, $fcpath) === FALSE)
 			{
 				$parts         = pathinfo($src);
 				$filename      = $parts['filename'];
 				$extension     = $parts['extension'];
 				$relative_path = $parts['dirname'];
-				$full_path     = FCPATH.$src;
+				$full_path     = $fcpath.'/'.$src;
 			}
 			else
 			{
-				$parts         = pathinfo(str_replace(FCPATH, '/', $src));
+				$parts         = pathinfo(str_replace($fcpath, '/', $src));
 				$filename      = $parts['filename'];
 				$extension     = $parts['extension'];
 				$relative_path = $parts['dirname'];
@@ -386,7 +474,33 @@ class Img_resize {
 		return array($full_path, $relative_path, $filename, $extension, $is_remote);
 	}
 
-	// ----------------------------------------------------------------
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Sharpen an image using GD
+	 *
+	 * @return void
+	 * @author Joseph Wensley
+	 */
+
+	function imagesharpen($image) {
+		if (function_exists('imageconvolution'))
+		{
+			$matrix = array(
+				array(-1, -1, -1),
+				array(-1, 16, -1),
+				array(-1, -1, -1),
+			);
+
+			$divisor = array_sum(array_map('array_sum', $matrix));
+			$offset = 0;
+			imageconvolution($image, $matrix, $divisor, $offset);
+
+			return $image;
+		}
+	}
+
+	// ------------------------------------------------------------------------
 
 	/**
 	 * Plugin Usage
@@ -409,7 +523,8 @@ Parameters
 **max_width and/or max_height:** Maximum width or height to resize to
 **alt (optional):** Alt text for the img tag
 **quality (optional):** The quality of the resized image between 0-100. Default is 100.
-**just_url (optional):** Set this to on to only return the URL to the image
+**just_url (optional):** Set this to 'on' to only return the URL to the image
+**sharpen (optional):** Setting this to 'on' will cause images to be sharpened after they are resized
 
 Example Usage
 =============
@@ -424,9 +539,17 @@ Example Usage
 
 Changelog
 =========
-1.0   - Initial Release
-1.0.1 - Bugfixes
-1.0.2 - Rewrite dimension calculation code
+1.1.0
+	+ Add option to sharpen images after resizing
+	+ Use Imagick if available
+1.0.3
+	+ Fix an issue with paths on Windows
+1.0.2
+	+ Rewrite dimension calculation code
+1.0.1
+	+ Bugfixes
+1.0
+	+ Initial Release
 <?php
 		$buffer = ob_get_contents();
 		ob_end_clean();
