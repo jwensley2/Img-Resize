@@ -194,13 +194,17 @@ class Img_resize {
 		{
 			$src_image = imagecreatefromjpeg($image_path);
 		}
-		elseif ($this->image_type = IMAGETYPE_PNG)
+		elseif ($this->image_type == IMAGETYPE_PNG)
 		{
 			$src_image = imagecreatefrompng($image_path);
 
 			// Make transparency work
 			imagealphablending($out_image, FALSE);
 			imagesavealpha($out_image, TRUE);
+		}
+		elseif ($this->image_type == IMAGETYPE_GIF)
+		{
+			$src_image = imagecreatefromgif($image_path);
 		}
 
 		// Copy and resample the source image to the destination image, cropping and resizing at the same time
@@ -217,10 +221,16 @@ class Img_resize {
 		{
 			imagejpeg($out_image, $out_path, $this->quality);
 		}
-		elseif ($this->image_type = IMAGETYPE_PNG)
+		elseif ($this->image_type == IMAGETYPE_PNG)
 		{
 			imagepng($out_image, $out_path);
 		}
+		elseif ($this->image_type == IMAGETYPE_GIF)
+		{
+			imagegif($out_image, $out_path);
+		}
+
+		imagedestroy($out_image); // Destroy the image, we've already written the file
 	}
 
 	// ------------------------------------------------------------------------
@@ -539,17 +549,25 @@ Example Usage
 
 Changelog
 =========
+1.1.1
++ Add GIF support
++ Bugfix
+
 1.1.0
-	+ Add option to sharpen images after resizing
-	+ Use Imagick if available
++ Add option to sharpen images after resizing
++ Use Imagick if available
+
 1.0.3
-	+ Fix an issue with paths on Windows
++ Fix an issue with paths on Windows
+
 1.0.2
-	+ Rewrite dimension calculation code
++ Rewrite dimension calculation code
+
 1.0.1
-	+ Bugfixes
++ Bugfixes
+
 1.0
-	+ Initial Release
++ Initial Release
 <?php
 		$buffer = ob_get_contents();
 		ob_end_clean();

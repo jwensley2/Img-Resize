@@ -28,6 +28,10 @@ Example Usage
 
 Changelog
 =========
+1.1.1
++ Add GIF support
++ Bugfix
+
 1.1.0
 + Add option to sharpen images after resizing
 + Use Imagick if available
