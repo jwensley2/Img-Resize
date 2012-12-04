@@ -140,7 +140,7 @@ class Img_resize {
 		$cache_url  = $base_url.$this->cache_dir;
 		$cache_path = FCPATH.$this->cache_dir;
 
-		$out_filename = "{$src_filename}_{$d['out_w']}_{$d['out_h']}.$src_extension";
+		$out_filename = "{$src_filename}_{$d['out_w']}x{$d['out_h']}.$src_extension";
 
 		$out_dir  = $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel);
 		$out_path = $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel.'/'.$out_filename);
