@@ -188,6 +188,11 @@ class Img_resize {
 
 	public function resize_using_gd($d, $image_path, $out_path)
 	{
+		@ini_set("memory_limit","12M");
+		@ini_set("memory_limit","16M");
+		@ini_set("memory_limit","32M");
+		@ini_set("memory_limit","64M");
+		@ini_set("memory_limit","128M");
 		$out_image = imagecreatetruecolor($d['out_w'], $d['out_h']);
 
 		if ($this->image_type == IMAGETYPE_JPEG)
