@@ -2,7 +2,7 @@ Requirements
 ============
 - ExpressionEngine 2.x
 - PHP 5+
-- GD2
+- GD2 or Imagick
 
 Parameters
 ==========
@@ -12,8 +12,9 @@ Parameters
 **max_width and/or max_height:** Maximum width or height to resize to  
 **alt (optional):** Alt text for the img tag  
 **quality (optional):** The quality of the resized image between 0-100. Default is 100.  
-**just_url (optional):** Set this to 'on' to only return the URL to the image  
-**sharpen (optional):** Setting this to 'on' will cause images to be sharpened after they are resized  
+**just_url (optional):** Set this to 'no' to only return the URL to the image  
+**sharpen (optional):** Setting this to 'no' will cause images to be sharpened after they are resized  
+**urldecode (optional):** Setting to 'yes' will disable decoding of the src url
 
 Example Usage
 =============
@@ -28,6 +29,10 @@ Example Usage
 
 Changelog
 =========
+1.2.0
++ Attempt to increase memory limit before resizing
++ Add urldecode parameter
+
 1.1.1
 + Add GIF support
 + Bugfix

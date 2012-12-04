@@ -30,12 +30,12 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    1.0.3
+ * @version    1.2.0
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '1.0.2',
+	'pi_version'    => '1.2.0',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
@@ -49,10 +49,10 @@ class Img_resize {
 
 	// Parameters
 	private $cache_dir = '/images/resized/';
-	private $quality    = 100;
-	private $sharpen    = FALSE;
-	private $cache      = TRUE;
-	private $just_url   = FALSE;
+	private $quality   = 100;
+	private $sharpen   = FALSE;
+	private $cache     = TRUE;
+	private $just_url  = FALSE;
 	private $urldecode = TRUE;
 
 	// Image Properties
@@ -79,12 +79,12 @@ class Img_resize {
 		$max_height = $this->EE->TMPL->fetch_param('max_height');
 		$max_width  = $this->EE->TMPL->fetch_param('max_width');
 
-		$this->cache_dir  = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
-		$this->just_url   = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
-		$this->urldecode  = $this->EE->TMPL->fetch_param('urldecode') == 'no' ? FALSE : TRUE;
-		$this->cache      = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
-		$this->sharpen    = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
-		$this->quality    = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
+		$this->cache_dir = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
+		$this->just_url  = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
+		$this->urldecode = $this->EE->TMPL->fetch_param('urldecode') == 'no' ? FALSE : TRUE;
+		$this->cache     = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
+		$this->sharpen   = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
+		$this->quality   = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
 
 		// Tag Attributes
 		$attr['alt']   = $this->EE->TMPL->fetch_param('alt');
@@ -149,7 +149,7 @@ class Img_resize {
 		// Check if the destination directory exists, create it if it doesn't
 		if( ! is_dir($out_dir))
 		{
-			mkdir($out_dir, DIR_WRITE_MODE, TRUE); // This does recursive creation in PHP 5.0 and up
+			mkdir($out_dir, DIR_WRITE_MODE, TRUE);
 		}
 
 		$cached = $this->is_cached($out_path, $src_path_full, $is_remote);
@@ -200,6 +200,7 @@ class Img_resize {
 		@ini_set("memory_limit","32M");
 		@ini_set("memory_limit","64M");
 		@ini_set("memory_limit","128M");
+
 		$out_image = imagecreatetruecolor($d['out_w'], $d['out_h']);
 
 		if ($this->image_type == IMAGETYPE_JPEG)
@@ -535,7 +536,7 @@ Requirements
 ============
 - ExpressionEngine 2.x
 - PHP 5+
-- GD2
+- GD2 or Imagick
 
 Parameters
 ==========
@@ -545,8 +546,9 @@ Parameters
 **max_width and/or max_height:** Maximum width or height to resize to
 **alt (optional):** Alt text for the img tag
 **quality (optional):** The quality of the resized image between 0-100. Default is 100.
-**just_url (optional):** Set this to 'on' to only return the URL to the image
-**sharpen (optional):** Setting this to 'on' will cause images to be sharpened after they are resized
+**just_url (optional):** Set this to 'no' to only return the URL to the image
+**sharpen (optional):** Setting this to 'no' will cause images to be sharpened after they are resized
+**urldecode (optional):** Setting to 'yes' will disable decoding of the src url
 
 Example Usage
 =============
@@ -561,6 +563,12 @@ Example Usage
 
 Changelog
 =========
+1.2.0
++ Attempt to increase memory limit before resizing
++ Add urldecode parameter
++ Suppress fopen errors
++ Bugfixes
+
 1.1.1
 + Add GIF support
 + Bugfix
