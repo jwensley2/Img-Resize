@@ -115,7 +115,7 @@ class Img_resize {
 		unset($src);
 
 		// Try and read the image
-		if (fopen($src_path_full, 'r'))
+		if (@fopen($src_path_full, 'r'))
 		{
 			list($src_width, $src_height, $this->image_type) = getimagesize($src_path_full);
 		}
