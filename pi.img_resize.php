@@ -136,7 +136,7 @@ class Img_resize {
 		}
 
 		// Determine the url and path to the cache folder
-		$base_url   = 'http://'.$_SERVER['SERVER_NAME'];
+		$base_url   = $this->EE->config->item('site_url');
 		$cache_url  = $base_url.$this->cache_dir;
 		$cache_path = FCPATH.$this->cache_dir;
 
