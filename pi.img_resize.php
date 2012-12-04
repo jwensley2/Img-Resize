@@ -65,9 +65,9 @@ class Img_resize {
 	{
 		$this->EE =& get_instance();
 
-		if (extension_loaded('gd2') AND function_exists('gd_info'))
+		if (( ! extension_loaded('gd') AND ! function_exists('gd_info')) AND ! class_exists("Imagick"))
 		{
-			$this->EE->TMPL->log_item("Img Resize: GD must be installed to use Img Resize");
+			$this->EE->TMPL->log_item("Img Resize: GD OR Imagick must be installed to use Img Resize");
 			$this->return_data = '';
 			return;
 		}
