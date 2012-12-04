@@ -481,7 +481,7 @@ class Img_resize {
 				$filename      = $parts['filename'];
 				$extension     = $parts['extension'];
 				$relative_path = $parts['dirname'];
-				$full_path     = $fcpath.'/'.$src;
+				$full_path     = $this->EE->functions->remove_double_slashes($fcpath.'/'.$src);
 			}
 			else
 			{
