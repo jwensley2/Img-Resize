@@ -49,10 +49,11 @@ class Img_resize {
 
 	// Parameters
 	private $cache_dir = '/images/resized/';
-	private $quality  = 100;
-	private $sharpen  = FALSE;
-	private $cache    = TRUE;
-	private $just_url = FALSE;
+	private $quality    = 100;
+	private $sharpen    = FALSE;
+	private $cache      = TRUE;
+	private $just_url   = FALSE;
+	private $urldecode = TRUE;
 
 	// Image Properties
 	private $image_type;
@@ -78,11 +79,12 @@ class Img_resize {
 		$max_height = $this->EE->TMPL->fetch_param('max_height');
 		$max_width  = $this->EE->TMPL->fetch_param('max_width');
 
-		$this->cache_dir = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
-		$this->just_url  = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
-		$this->cache     = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
-		$this->sharpen   = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
-		$this->quality   = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
+		$this->cache_dir  = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : $this->cache_dir;
+		$this->just_url   = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
+		$this->urldecode  = $this->EE->TMPL->fetch_param('urldecode') == 'no' ? FALSE : TRUE;
+		$this->cache      = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
+		$this->sharpen    = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
+		$this->quality    = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
 
 		// Tag Attributes
 		$attr['alt']   = $this->EE->TMPL->fetch_param('alt');
@@ -102,6 +104,11 @@ class Img_resize {
 			$this->EE->TMPL->log_item("Img Resize: No width or height specified");
 			$this->return_data = '';
 			return;
+		}
+
+		if ($this->urldecode)
+		{
+			$src = urldecode($src);
 		}
 
 		list($src_path_full, $src_path_rel, $src_filename, $src_extension, $is_remote) = $this->get_path_info($src);
@@ -137,7 +144,7 @@ class Img_resize {
 
 		$out_dir  = $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel);
 		$out_path = $this->EE->functions->remove_double_slashes($cache_path.$src_path_rel.'/'.$out_filename);
-		$out_url  = $this->EE->functions->remove_double_slashes($cache_url.$src_path_rel.'/'.$out_filename);
+		$out_url  = $this->EE->functions->remove_double_slashes($cache_url.$src_path_rel.'/'.urlencode($out_filename));
 
 		// Check if the destination directory exists, create it if it doesn't
 		if( ! is_dir($out_dir))
