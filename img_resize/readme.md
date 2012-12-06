@@ -32,6 +32,8 @@ Changelog
 1.2.0
 + Attempt to increase memory limit before resizing
 + Add urldecode parameter
++ Suppress fopen errors
++ Bugfixes
 
 1.1.1
 + Add GIF support
