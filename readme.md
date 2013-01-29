@@ -29,6 +29,9 @@ Example Usage
 
 Changelog
 =========
+1.2.1
++ Change a setting when resizing using Imagick that caused inconsistent behaviour between it and GD
+
 1.2.0
 + Attempt to increase memory limit before resizing
 + Add urldecode parameter
