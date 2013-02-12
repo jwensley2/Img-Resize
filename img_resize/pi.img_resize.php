@@ -30,19 +30,19 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    1.2.1
+ * @version    2.0.0
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '1.2.1',
+	'pi_version'    => '2.0.0',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
 	'pi_usage'      => Img_resize::usage()
 );
 
-
+// Require our image library which does most of the work
 require_once("library/img_resize_image.php");
 
 class Img_resize {
@@ -56,20 +56,42 @@ class Img_resize {
 	{
 		$this->EE =& get_instance();
 
-		// Retrieve the parameters
+		// Options
+		$options = array(
+			'base_path'     => FCPATH,
+			'cache_path'    => FCPATH.'/images/resized',
+			'cache_url'     => $this->EE->config->item('base_url').'/images/resized',
+			'cache'         => TRUE,
+			'handle_retina' => TRUE,
+			'just_url'      => FALSE,
+			'quality'       => 100,
+			'sharpen'       => FALSE,
+			'urldecode'     => TRUE,
+		);
+
+		foreach ($options AS $key => $value)
+		{
+			// Check for a config item
+			if ($this->EE->config->item("img_resize:{$key}"))
+			{
+				$options[$key] = $this->EE->config->item("img_resize:{$key}");
+			}
+
+			// Check for a tag parameter
+			if ($this->EE->TMPL->fetch_param($key))
+			{
+				$options[$key] = ($this->EE->config->item("img_resize:{$key}") == 'yes') ? TRUE : FALSE;
+			}
+		}
+
+		// Get Src and Width/Height Params
 		$src        = $this->EE->TMPL->fetch_param('src');
 		$height     = $this->EE->TMPL->fetch_param('height');
 		$width      = $this->EE->TMPL->fetch_param('width');
 		$max_height = $this->EE->TMPL->fetch_param('max_height');
 		$max_width  = $this->EE->TMPL->fetch_param('max_width');
 
-		$cache_dir = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : '/images/resized/';
-		$just_url  = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
-		$urldecode = $this->EE->TMPL->fetch_param('urldecode') == 'no' ? FALSE : TRUE;
-		$cache     = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
-		$sharpen   = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
-		$quality   = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
-
+		// Is there a source?
 		if ( ! $src)
 		{
 			$this->EE->TMPL->log_item("Img Resize: No source specified");
@@ -77,6 +99,7 @@ class Img_resize {
 			return;
 		}
 
+		// We need a width or height
 		if ( ! $height AND ! $width AND ! $max_height AND ! $max_width)
 		{
 			$this->EE->TMPL->log_item("Img Resize: No width or height specified");
@@ -84,20 +107,15 @@ class Img_resize {
 			return;
 		}
 
+		// Try to create an image
 		try {
-			$options = array(
-				'base_path' => FCPATH,
-				'base_url'  => $this->EE->config->item('base_url'),
-				'cache'     => $cache,
-				'cache_dir' => $cache_dir,
-				'quality'   => $quality,
-				'sharpen'   => $sharpen,
-				'urldecode' => $urldecode,
-			);
+			$img_options = $options;
 
-			$image = new Img_resize_image($src, $options);
+			$image = new Img_resize_image($src, $img_options);
 		} catch (Exception $e) {
-			$this->EE->TMPL->log_item("Img Resize: ".$e->getMessage());
+			$message = $e->getMessage();
+
+			$this->EE->TMPL->log_item("Img Resize: {$message}");
 			$this->return_data = '';
 			return;
 		}
@@ -112,14 +130,26 @@ class Img_resize {
 		$max = ($max_width OR $max_height) ? TRUE : FALSE;
 		$image->resize($width, $height, $max);
 
-		if ($just_url == TRUE)
+		// Handle retina images
+		if ($image->isRetina() AND $options['handle_retina'] === TRUE)
 		{
-			$this->return_data = $image->get_url();
+			$rimg_options = $options;
+			$rimg_options['retina'] = TRUE;
+
+			$retina = Img_resize_image::load($src, $rimg_options)->resize($width * 2, $height * 2, $max);
+
+			$attr['data-retina'] = $retina->getURL();
+		}
+
+		// Set our output, either the img tag or the image url
+		if ($options['just_url'] === TRUE)
+		{
+			$this->return_data = $image->getURL();
 			return;
 		}
 		else
 		{
-			$this->return_data = $image->build_tag($attr);
+			$this->return_data = $image->buildTag($attr);
 			return;
 		}
 	}
@@ -141,15 +171,36 @@ Requirements
 
 Parameters
 ==========
+
+Required
+--------
+The src and at least 1 dimension parameter are required
+
 **src:** Path to the image can be a full or relative (to the index.php) system path or a local url
-**dir (optional):** Relative path to where you want resized images to be stored. Default is /images/resized/
 **width and/or height:** Absolute width or height to resize to
 **max_width and/or max_height:** Maximum width or height to resize to
-**alt (optional):** Alt text for the img tag
-**quality (optional):** The quality of the resized image between 0-100. Default is 100.
-**just_url (optional):** Set this to 'no' to only return the URL to the image
-**sharpen (optional):** Setting this to 'no' will cause images to be sharpened after they are resized
-**urldecode (optional):** Setting to 'yes' will disable decoding of the src url
+
+Optional
+---------
+The following options can also be set globaly in a config file using like $config['img_resize:param'] = 'VALUE'
+
+**cache_path:** Full path to where your images are cached, default is FCPATH/images/resized
+**cache_url:** URL to where your images are cached, default is your base_path + /images/resized
+**quality:** The quality of the resized image between 0-100. Default is 100.
+**just_url:** Set this to 'no' to only return the URL to the image
+**sharpen:** Setting this to 'no' will cause images to be sharpened after they are resized
+**urldecode:** Setting to 'no' will disable decoding of the src url
+**handle_retina:** Set to 'no' to disable
+
+Attributes
+----------
+These will be set as attributes on the img tag
+
+**alt**
+**title**
+**id**
+**class**
+
 
 Example Usage
 =============
@@ -162,8 +213,26 @@ Example Usage
 	// Outputs
 	http://domain.com/images/resized/assets/img/imagename_100x100.jpg
 
+Retina Handling
+===============
+If you have a 100x100 image named like image@2x.png and resize to 25x25 the plugin will generate two images.
+
+The first image will be 25x25 and named like image_25x25.png
+The second image will be 50x50 and named like image_25x25@2x.png
+
+This should provide support for many retina handling methods that use @2x as an identifer, like http://retinajs.com/.
+
+A data-retina attribute will also be set on the img tag containing the url to the retina image.
+
 Changelog
 =========
+2.0.0
++ Updating to this version may break things for you, be sure to test on a non-live site.
++ Add support for retina images, if an image is named with @2x the plugin will generate both retina and non-retina versions.
++ Added the ability to set some options in a config file
++ Remove dir param
++ Refactored most of the heavy lifting code into a seperate class
+
 1.2.1
 + Change a setting when resizing using Imagick that caused inconsistent behaviour between it and GD
 
@@ -180,18 +249,6 @@ Changelog
 1.1.0
 + Add option to sharpen images after resizing
 + Use Imagick if available
-
-1.0.3
-+ Fix an issue with paths on Windows
-
-1.0.2
-+ Rewrite dimension calculation code
-
-1.0.1
-+ Bugfixes
-
-1.0
-+ Initial Release
 <?php
 		$buffer = ob_get_contents();
 		ob_end_clean();
