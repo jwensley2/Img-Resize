@@ -14,7 +14,8 @@ Parameters
 **quality (optional):** The quality of the resized image between 0-100. Default is 100.  
 **just_url (optional):** Set this to 'no' to only return the URL to the image  
 **sharpen (optional):** Setting this to 'no' will cause images to be sharpened after they are resized  
-**urldecode (optional):** Setting to 'yes' will disable decoding of the src url
+**urldecode (optional):** Setting to 'yes' will disable decoding of the src url  
+**handle_retina (optional):** Set to 'no' to disable  
 
 Example Usage
 =============
@@ -27,8 +28,21 @@ Example Usage
 	// Outputs
 	http://domain.com/images/resized/assets/img/imagename_100x100.jpg
 
+Retina Handling
+===============
+If you have a 100x100 image named like image@2x.png and resize to 25x25 the plugin will generate two images.
+
+The first image will be 25x25 and named like image_25x25.png
+The second image will be 50x50 and named like image_25x25@2x.png
+
+This should provide support for many retina handling methods that use @2x as an identifer, like http://retinajs.com/.
+
 Changelog
 =========
+1.3.0
++ Add support for retina images, if an image is named with @2x the plugin will generate both retina and non-retina versions.
++ Refactored most of the heavy lifting code into a seperate class
+
 1.2.1
 + Change a setting when resizing using Imagick that caused inconsistent behaviour between it and GD
 

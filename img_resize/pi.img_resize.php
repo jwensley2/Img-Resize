@@ -30,19 +30,19 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    1.2.1
+ * @version    1.3.0
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '1.2.1',
+	'pi_version'    => '1.3.0',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
 	'pi_usage'      => Img_resize::usage()
 );
 
-
+// Require our image library which does most of the work
 require_once("library/img_resize_image.php");
 
 class Img_resize {
@@ -63,12 +63,13 @@ class Img_resize {
 		$max_height = $this->EE->TMPL->fetch_param('max_height');
 		$max_width  = $this->EE->TMPL->fetch_param('max_width');
 
-		$cache_dir = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : '/images/resized/';
-		$just_url  = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
-		$urldecode = $this->EE->TMPL->fetch_param('urldecode') == 'no' ? FALSE : TRUE;
-		$cache     = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
-		$sharpen   = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
-		$quality   = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
+		$cache_dir     = $this->EE->TMPL->fetch_param('dir') ? $this->EE->TMPL->fetch_param('dir') : '/images/resized/';
+		$just_url      = $this->EE->TMPL->fetch_param('just_url') == 'yes' ? TRUE : FALSE;
+		$urldecode     = $this->EE->TMPL->fetch_param('urldecode') == 'no' ? FALSE : TRUE;
+		$cache         = $this->EE->TMPL->fetch_param('cache') == 'no' ? FALSE : TRUE;
+		$sharpen       = $this->EE->TMPL->fetch_param('sharpen') == 'yes' ? TRUE : FALSE;
+		$quality       = (int) $this->EE->TMPL->fetch_param('quality') ? $this->EE->TMPL->fetch_param('quality') : 100;
+		$handle_retina = $this->EE->TMPL->fetch_param('handle_retina') == 'no' ? FALSE : TRUE;
 
 		if ( ! $src)
 		{
@@ -112,14 +113,24 @@ class Img_resize {
 		$max = ($max_width OR $max_height) ? TRUE : FALSE;
 		$image->resize($width, $height, $max);
 
-		if ($just_url == TRUE)
+		if ($image->isRetina() AND $handle_retina === TRUE)
 		{
-			$this->return_data = $image->get_url();
+			$roptions = $options;
+			$roptions['retina'] = TRUE;
+
+			$retina = Img_resize_image::load($src, $roptions)->resize($width * 2, $height * 2, $max);
+
+			$attr['data-retina'] = $retina->getURL();
+		}
+
+		if ($just_url === TRUE)
+		{
+			$this->return_data = $image->getURL();
 			return;
 		}
 		else
 		{
-			$this->return_data = $image->build_tag($attr);
+			$this->return_data = $image->buildTag($attr);
 			return;
 		}
 	}
@@ -149,7 +160,8 @@ Parameters
 **quality (optional):** The quality of the resized image between 0-100. Default is 100.
 **just_url (optional):** Set this to 'no' to only return the URL to the image
 **sharpen (optional):** Setting this to 'no' will cause images to be sharpened after they are resized
-**urldecode (optional):** Setting to 'yes' will disable decoding of the src url
+**urldecode (optional):** Setting to 'no' will disable decoding of the src url
+**handle_retina (optional):** Set to 'no' to disable
 
 Example Usage
 =============
@@ -162,8 +174,21 @@ Example Usage
 	// Outputs
 	http://domain.com/images/resized/assets/img/imagename_100x100.jpg
 
+Retina Handling
+===============
+If you have a 100x100 image named like image@2x.png and resize to 25x25 the plugin will generate two images.
+
+The first image will be 25x25 and named like image_25x25.png
+The second image will be 50x50 and named like image_25x25@2x.png
+
+This should provide support for many retina handling methods that use @2x as an identifer, like http://retinajs.com/.
+
 Changelog
 =========
+1.3.0
++ Add support for retina images, if an image is named with @2x the plugin will generate both retina and non-retina versions.
++ Refactored most of the heavy lifting code into a seperate class
+
 1.2.1
 + Change a setting when resizing using Imagick that caused inconsistent behaviour between it and GD
 

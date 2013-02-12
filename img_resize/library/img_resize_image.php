@@ -34,6 +34,7 @@ class Img_resize_image {
 	private $sharpen   = FALSE;
 	private $cache     = TRUE;
 	private $urldecode = TRUE;
+	private $retina    = FALSE;
 
 	// Image Properties
 	private $image_path;
@@ -44,6 +45,10 @@ class Img_resize_image {
 	private $out_path;
 	private $out_url;
 	private $out_width;
+	private $dimensions;
+
+	// Constants
+	const retina_pattern = "/@2x/s";
 
 	/**
 	 * Constructor
@@ -59,18 +64,20 @@ class Img_resize_image {
 			throw new Exception('GD OR Imagick must be installed to use Img Resize', 1);
 		}
 
+		// Set properties for each option
 		foreach ($options AS $key => $value)
 		{
 			$this->$key = $value;
 		}
 
+		// urldecode the image path if the option was on
 		if ($this->urldecode)
 		{
 			$this->image_path = urldecode($this->image_path);
 		}
 
 		// Get the path info for the image
-		$this->find_path_info();
+		$this->findPathInfo();
 
 		// Try and read the image
 		if (@fopen($this->full_path, 'r'))
@@ -85,6 +92,10 @@ class Img_resize_image {
 
 	// ------------------------------------------------------------------------
 
+	/**
+	 * An alias to the constructor to allow method chaining
+	 * @return object  A copy of the new object
+	 */
 	public function load($image_path, $options = array())
 	{
 		return new self($image_path, $options);
@@ -92,11 +103,19 @@ class Img_resize_image {
 
 	// ------------------------------------------------------------------------
 
+	/**
+	 * Resize the image
+	 * @param  int     $width   The width in pixels
+	 * @param  int     $height  The height in pixels
+	 * @param  boolean $max     Are the dimensions the max to resize to or absolute
+	 * @param  string  $method  The resizing method to use (Imagick or GD)
+	 * @return object           A copy of the object to allow chaining
+	 */
 	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
 	{
 
-		$this->calculate_dimensions($width, $height, $max);
-		$this->find_output_paths();
+		$this->calculateDimensions($width, $height, $max);
+		$this->findOutputPaths();
 
 		// Check if the destination directory exists, create it if it doesn't
 		if( ! is_dir($this->out_dir))
@@ -104,23 +123,90 @@ class Img_resize_image {
 			mkdir($this->out_dir, 0777, TRUE);
 		}
 
-		$cached = $this->is_cached();
+		$cached = $this->isCached();
 
 		if ( ! $cached OR $this->cache === FALSE)
 		{
 			if ($method === 'Imagick' AND class_exists("Imagick"))
 			{
-				$this->resize_using_imagick();
+				$this->resizeUsingImagick();
 			}
 			else
 			{
-				$this->resize_using_gd();
+				$this->resizeUsingGD();
 			}
 		}
 
 		return $this;
 	}
 
+	// ------------------------------------------------------------------------
+
+
+	/**
+	 * Build the IMG HTML tag
+	 * @param  array  $attributes Attributes to set on the tag
+	 * @return string             The HTML tag
+	 */
+	public function buildTag($attributes = array())
+	{
+		$tag = '<img ';
+
+		$attributes['width']  = $this->out_width;
+		$attributes['height'] = $this->out_height;
+		$attributes['src']    = $this->out_url;
+
+		foreach ($attributes AS $key => $value)
+		{
+			if ( ! empty($value))
+			{
+				$tag .= "{$key}=\"$value\" ";
+			}
+		}
+
+		$tag .= '>';
+
+		return $tag;
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Return the URL to the image
+	 * @return string The image URL
+	 */
+	public function getURL()
+	{
+		return $this->out_url;
+	}
+
+	// ------------------------------------------------------------------------
+
+	public function getDimensions()
+	{
+		# code...
+	}
+
+	// ------------------------------------------------------------------------
+
+	/**
+	 * Check if the image contains a retina identifier
+	 * @return boolean [description]
+	 */
+	public function isRetina()
+	{
+		$match = preg_match(self::retina_pattern, $this->filename);
+
+		if ($match === 1)
+		{
+			return TRUE;
+		}
+
+		return FALSE;
+	}
+
+	// ------------------------------------------------------------------------
+	//  Private Methods Below
 	// ------------------------------------------------------------------------
 
 	/**
@@ -130,7 +216,7 @@ class Img_resize_image {
 	 * @author Joseph Wensley
 	 */
 
-	private function resize_using_gd()
+	private function resizeUsingGD()
 	{
 		@ini_set("memory_limit","12M");
 		@ini_set("memory_limit","16M");
@@ -196,7 +282,7 @@ class Img_resize_image {
 	 * @author Joseph Wensley
 	 */
 
-	private function resize_using_imagick()
+	private function resizeUsingImagick()
 	{
 		$image = new Imagick($this->full_path);
 
@@ -223,50 +309,13 @@ class Img_resize_image {
 	// ------------------------------------------------------------------------
 
 	/**
-	 * Build the HTML tag
-	 *
-	 * @return string
-	 * @author Joseph Wensley
-	 */
-
-	public function build_tag($attributes = array())
-	{
-		$tag = '<img ';
-
-		$attributes['width']  = $this->out_width;
-		$attributes['height'] = $this->out_height;
-		$attributes['src']    = $this->out_url;
-
-		foreach ($attributes AS $key => $value)
-		{
-			if ( ! empty($value))
-			{
-				$tag .= "{$key}=\"$value\" ";
-			}
-		}
-
-		$tag .= '>';
-
-		return $tag;
-	}
-
-	// ------------------------------------------------------------------------
-
-	public function get_url()
-	{
-		return $this->out_url;
-	}
-
-	// ------------------------------------------------------------------------
-
-	/**
 	 * Check to see if there is a cached version of the image
 	 *
 	 * @return bool
 	 * @author Joseph Wensley
 	 */
 
-	private function is_cached()
+	private function isCached()
 	{
 		if (file_exists($this->out_path) AND $this->is_remote)
 		{
@@ -294,7 +343,7 @@ class Img_resize_image {
 	 * @author Joseph Wensley
 	 */
 
-	private function calculate_dimensions($out_w, $out_h, $max = FALSE)
+	private function calculateDimensions($out_w, $out_h, $max = FALSE)
 	{
 		$crop = FALSE;
 
@@ -409,7 +458,7 @@ class Img_resize_image {
 	 * @author Joseph Wensley
 	 */
 
-	private function find_path_info()
+	private function findPathInfo()
 	{
 		$pattern = "/(((http|ftp|https):\/\/){1}([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)+([\S,:\/\.\?=a-zA-Z0-9_-]+))/is";
 
@@ -440,7 +489,7 @@ class Img_resize_image {
 				$filename      = $parts['filename'];
 				$extension     = $parts['extension'];
 				$relative_path = $parts['dirname'];
-				$full_path     = $this->remove_double_slashes($fcpath.'/'.$this->image_path);
+				$full_path     = $this->removeDoubleSlashes($fcpath.'/'.$this->image_path);
 			}
 			else
 			{
@@ -461,17 +510,26 @@ class Img_resize_image {
 
 	// ------------------------------------------------------------------------
 
-	private function find_output_paths()
+	private function findOutputPaths()
 	{
 		// Determine the url and path to the cache folder
 		$this->cache_url  = $this->base_url.$this->cache_dir;
 		$this->cache_path = $this->base_path.$this->cache_dir;
 
-		$filename = "{$this->filename}_{$this->out_width}x{$this->out_height}.{$this->extension}";
+		$filename = preg_replace(self::retina_pattern, '', $this->filename);
 
-		$this->out_dir  = $this->remove_double_slashes($this->cache_path.$this->relative_path);
-		$this->out_path = $this->remove_double_slashes($this->cache_path.$this->relative_path.'/'.$filename);
-		$this->out_url  = $this->remove_double_slashes($this->cache_url.$this->relative_path.'/'.urlencode($filename));
+		if ($this->retina == FALSE)
+		{
+			$out_filename = "{$filename}_{$this->out_width}x{$this->out_height}.{$this->extension}";
+		}
+		else
+		{
+			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2)."@2x.{$this->extension}";
+		}
+
+		$this->out_dir  = $this->removeDoubleSlashes($this->cache_path.$this->relative_path);
+		$this->out_path = $this->removeDoubleSlashes($this->cache_path.$this->relative_path.'/'.$out_filename);
+		$this->out_url  = $this->removeDoubleSlashes($this->cache_url.$this->relative_path.'/'.urlencode($out_filename));
 	}
 
 	// ------------------------------------------------------------------------
@@ -501,21 +559,9 @@ class Img_resize_image {
 
 	// ------------------------------------------------------------------------
 
-	private function remove_double_slashes($string)
+	private function removeDoubleSlashes($string)
 	{
 		return preg_replace("#([^/:])/+#", "\\1/", $string);
-	}
-
-	// ------------------------------------------------------------------------
-
-	public function is_retina()
-	{
-		$regex = "/@2x/s";
-
-		if (preg_match($regex, $this->filename))
-		{
-			# code...
-		}
 	}
 }
 
