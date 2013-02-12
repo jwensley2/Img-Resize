@@ -80,7 +80,22 @@ class Img_resize {
 			// Check for a tag parameter
 			if ($this->EE->TMPL->fetch_param($key))
 			{
-				$options[$key] = ($this->EE->config->item("img_resize:{$key}") == 'yes') ? TRUE : FALSE;
+				$param = $this->EE->TMPL->fetch_param($key);
+
+				switch ($param)
+				{
+					case 'yes':
+						$options[$key] = TRUE;
+						break;
+
+					case 'no':
+						$options[$key] = FALSE;
+						break;
+
+					default:
+						$options[$key] = $param;
+						break;
+				}
 			}
 		}
 
