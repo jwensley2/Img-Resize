@@ -59,6 +59,7 @@ class Img_resize {
 		// Options
 		$options = array(
 			'base_path'     => FCPATH,
+			'base_url'      => $this->EE->config->item('base_url'),
 			'cache_path'    => FCPATH.'/images/resized',
 			'cache_url'     => $this->EE->config->item('base_url').'/images/resized',
 			'cache'         => TRUE,

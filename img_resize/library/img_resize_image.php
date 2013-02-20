@@ -469,7 +469,7 @@ class Img_resize_image {
 	{
 		$pattern = "/(((http|ftp|https):\/\/){1}([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)+([\S,:\/\.\?=a-zA-Z0-9_-]+))/is";
 
-		if (preg_match($pattern, $this->image_path, $matches))
+		if (preg_match($pattern, $this->image_path, $matches) AND stripos($this->image_path, $this->base_url) === FALSE)
 		{
 			$url_parts = parse_url($this->image_path);
 			$url_path  = $url_parts['path'];
@@ -490,6 +490,10 @@ class Img_resize_image {
 
 			$this->base_path = rtrim($this->base_path, '\\/');
 
+			if (stripos($this->image_path, $this->base_url) !== FALSE)
+			{
+				$this->image_path = str_replace($this->base_url, "", $this->image_path);
+			}
 			// Check if the image path contains the base path, if it's not assume it's a relative path
 			if (stripos($this->image_path, $this->base_path) === FALSE)
 			{
