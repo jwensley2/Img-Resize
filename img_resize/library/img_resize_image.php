@@ -199,7 +199,7 @@ class Img_resize_image {
 
 	/**
 	 * Check if the image contains a retina identifier
-	 * @return boolean [description]
+	 * @return boolean Is the image retina?
 	 */
 	public function isRetina()
 	{
@@ -494,6 +494,7 @@ class Img_resize_image {
 			{
 				$this->image_path = str_replace($this->base_url, "", $this->image_path);
 			}
+
 			// Check if the image path contains the base path, if it's not assume it's a relative path
 			if (stripos($this->image_path, $this->base_path) === FALSE)
 			{

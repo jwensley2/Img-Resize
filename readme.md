@@ -20,15 +20,16 @@ Optional
 The following options can also be set globaly in a config file using like $config['img_resize:param'] = 'VALUE'
 
 **quality:** The quality of the resized image between 0-100. Default is 100.  
-**just_url:** Set this to 'no' to only return the URL to the image  
+**just\_url:** Set this to 'no' to only return the URL to the image  
 **sharpen:** Setting this to 'no' will cause images to be sharpened after they are resized  
 **urldecode:** Setting to 'no' will disable decoding of the src url  
 **handle_retina:** Set to 'no' to disable  
 
 **These should only be set if you know what you are doing**  
-**base_path:** The base path to where your images are stored, this is used to determine the path to your images when using relative image paths  
-**cache_path:** Full path to where your images are cached, default is FCPATH/images/resized  
-**cache_url:** URL to where your images are cached, default is your base\_path + /images/resized  
+**base\_url:** URL to where your images are stored, default is your base_url  
+**base\_path:** The base path to where your images are stored, this is used to determine the path to your images when using relative image paths  
+**cache\_path:** Full path to where your images are cached, default is FCPATH/images/resized  
+**cache\_url:** URL to where your images are cached, default is your base\_path + /images/resized  
 
 Attributes
 ----------
@@ -64,6 +65,11 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
+2.1.0
++ Should no longer load images on the same domain as if they were remote when using full urls
++ Added base\_url paremeter that you can set if you're images are on a sub-domain or something similar to make them load from the filesystem instead of remotely
++ Fix a bug with max\_width and max\_height
+
 2.0.0
 + Updating to this version may break things for you, be sure to test on a non-live site.
 + Add support for retina images, if an image is named with @2x the plugin will generate both retina and non-retina versions.
