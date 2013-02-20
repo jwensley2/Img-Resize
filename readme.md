@@ -13,7 +13,7 @@ The src and at least 1 dimension parameter are required
 
 **src:** Path to the image can be a full or relative (to the index.php) system path or a local url  
 **width and/or height:** Absolute width or height to resize to  
-**max_width and/or max_height:** Maximum width or height to resize to  
+**max\_width and/or max\_height:** Maximum width or height to resize to  
 
 Optional
 ---------
@@ -56,8 +56,8 @@ Retina Handling
 ===============
 If you have a 100x100 image named like image@2x.png and resize to 25x25 the plugin will generate two images.
 
-The first image will be 25x25 and named like image_25x25.png  
-The second image will be 50x50 and named like image_25x25@2x.png
+The first image will be 25x25 and named like image\_25x25.png  
+The second image will be 50x50 and named like image\_25x25@2x.png
 
 This should provide support for many retina handling methods that use @2x as an identifer, like http://retinajs.com/.
 
@@ -66,11 +66,13 @@ A data-retina attribute will also be set on the img tag containing the url to th
 Changelog
 =========
 2.1.0
+
 + Should no longer load images on the same domain as if they were remote when using full urls
 + Added base\_url paremeter that you can set if you're images are on a sub-domain or something similar to make them load from the filesystem instead of remotely
 + Fix a bug with max\_width and max\_height
 
 2.0.0
+
 + Updating to this version may break things for you, be sure to test on a non-live site.
 + Add support for retina images, if an image is named with @2x the plugin will generate both retina and non-retina versions.
 + Added the ability to set some options in a config file
@@ -78,18 +80,22 @@ Changelog
 + Refactored most of the heavy lifting code into a seperate class
 
 1.2.1
+
 + Change a setting when resizing using Imagick that caused inconsistent behaviour between it and GD
 
 1.2.0
+
 + Attempt to increase memory limit before resizing
 + Add urldecode parameter
 + Suppress fopen errors
 + Bugfixes
 
 1.1.1
+
 + Add GIF support
 + Bugfix
 
 1.1.0
+
 + Add option to sharpen images after resizing
 + Use Imagick if available
