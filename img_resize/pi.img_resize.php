@@ -142,7 +142,9 @@ class Img_resize {
 		$attr['id']    = $this->EE->TMPL->fetch_param('id');
 
 		// Resize the image
-		$max = ($max_width OR $max_height) ? TRUE : FALSE;
+		$max    = ($max_width OR $max_height) ? TRUE : FALSE;
+		$width  = ($max_width) ? $max_width : $width;
+		$height = ($max_height) ? $max_height : $height;
 		$image->resize($width, $height, $max);
 
 		// Handle retina images
