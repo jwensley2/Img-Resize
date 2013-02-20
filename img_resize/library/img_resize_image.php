@@ -186,9 +186,13 @@ class Img_resize_image {
 
 	// ------------------------------------------------------------------------
 
+	/**
+	 * Return the dimensions
+	 * @return array The dimensions
+	 */
 	public function getDimensions()
 	{
-		# code...
+		return $this->dimensions;
 	}
 
 	// ------------------------------------------------------------------------
