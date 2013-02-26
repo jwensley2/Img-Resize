@@ -30,7 +30,7 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    2.1.0
+ * @version    2.1.1
  */
 
 $plugin_info = array(
@@ -154,7 +154,9 @@ class Img_resize {
 			$rimg_options = $options;
 			$rimg_options['retina'] = TRUE;
 
-			$retina = Img_resize_image::load($src, $rimg_options)->resize($width * 2, $height * 2, $max);
+			$d = $image->getDimensions();
+
+			$retina = Img_resize_image::load($src, $rimg_options)->resize($d['out_w'] * 2, $d['out_h'] * 2, $max);
 
 			$attr['data-retina'] = $retina->getURL();
 		}
@@ -212,7 +214,7 @@ The following options can also be set globaly in a config file using like $confi
 **base_url:** URL to where your images are stored, default is your base_url
 **base_path:** The base path to where your images are stored, this is used to determine the path to your images when using relative image paths
 **cache_path:** Full path to where your images are cached, default is FCPATH/images/resized
-**cache_url:** URL to where your images are cached, default is your base\_path + /images/resized
+**cache_url:** URL to where your images are cached, default is your base_path + /images/resized
 
 Attributes
 ----------
@@ -248,13 +250,18 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
+2.1.1
+
++ Fix a bug that could cause retina images could be sized and named wrong
+
 2.1.0
+
 + Should no longer load images on the same domain as if they were remote when using full urls
 + Added base_url paremeter that you can set if you're images are on a sub-domain or something similar to make them load from the filesystem instead of remotely
 + Fix a bug with max_width and max_height
 
-
 2.0.0
+
 + Updating to this version may break things for you, be sure to test on a non-live site.
 + Add support for retina images, if an image is named with @2x the plugin will generate both retina and non-retina versions.
 + Added the ability to set some options in a config file
@@ -262,19 +269,23 @@ Changelog
 + Refactored most of the heavy lifting code into a seperate class
 
 1.2.1
+
 + Change a setting when resizing using Imagick that caused inconsistent behaviour between it and GD
 
 1.2.0
+
 + Attempt to increase memory limit before resizing
 + Add urldecode parameter
 + Suppress fopen errors
 + Bugfixes
 
 1.1.1
+
 + Add GIF support
 + Bugfix
 
 1.1.0
+
 + Add option to sharpen images after resizing
 + Use Imagick if available
 <?php

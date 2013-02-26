@@ -65,6 +65,10 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
+2.1.1
+
++ Fix a bug that could cause retina images could be sized and named wrong
+
 2.1.0
 
 + Should no longer load images on the same domain as if they were remote when using full urls
