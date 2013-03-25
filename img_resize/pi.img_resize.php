@@ -30,12 +30,12 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    2.1.1
+ * @version    2.2.0
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '2.1.0',
+	'pi_version'    => '2.2.0',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
@@ -250,6 +250,10 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
+2.2.0
+
++ Improve handling of remote images, should be much faster now
+
 2.1.1
 
 + Fix a bug that could cause retina images could be sized and named wrong

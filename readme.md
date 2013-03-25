@@ -65,6 +65,10 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
+2.2.0
+
++ Improve handling of remote images, should be much faster now
+
 2.1.1
 
 + Fix a bug that could cause retina images could be sized and named wrong

@@ -83,6 +83,12 @@ class Img_resize_image {
 		// Get the path info for the image
 		$this->findPathInfo();
 
+		// If the image is remote store a local copy of it
+		if ($this->is_remote)
+		{
+			$this->getRemote();
+		}
+
 		// Try and read the image
 		if (@fopen($this->full_path, 'r'))
 		{
@@ -316,6 +322,31 @@ class Img_resize_image {
 
 	// ------------------------------------------------------------------------
 
+	public function getRemote()
+	{
+		$dir  = $this->removeDoubleSlashes("{$this->cache_path}/remote");
+		$path = $this->removeDoubleSlashes("{$dir}/{$this->filename}.{$this->extension}");
+
+		// Create the remote directory if it doesn't exist
+		if ( ! is_dir($dir))
+		{
+			mkdir($dir, 0777, TRUE);
+		}
+
+		// Store the file if it hasn't been retrieved yet
+		if ( ! file_exists($path))
+		{
+			$image = file_get_contents($this->full_path);
+
+			file_put_contents($path, $image);
+		}
+
+		// Change the full path to use the local copy
+		$this->full_path = $path;
+	}
+
+	// ------------------------------------------------------------------------
+
 	/**
 	 * Check to see if there is a cached version of the image
 	 *
@@ -477,7 +508,7 @@ class Img_resize_image {
 			$path_parts    = pathinfo($url_path);
 			$filename      = $path_parts['filename'];
 			$extension     = $path_parts['extension'];
-			$relative_path = $path_parts['dirname'];
+			$relative_path = $this->removeDoubleSlashes($url_parts['host'].'/'.$path_parts['dirname']);
 			$full_path     = $this->image_path;
 			$is_remote     = TRUE;
 		}
@@ -536,9 +567,9 @@ class Img_resize_image {
 			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2)."@2x.{$this->extension}";
 		}
 
-		$this->out_dir  = $this->removeDoubleSlashes($this->cache_path.$this->relative_path);
-		$this->out_path = $this->removeDoubleSlashes($this->cache_path.$this->relative_path.'/'.$out_filename);
-		$this->out_url  = $this->removeDoubleSlashes($this->cache_url.$this->relative_path.'/'.urlencode($out_filename));
+		$this->out_dir  = $this->removeDoubleSlashes("{$this->cache_path}/{$this->relative_path}");
+		$this->out_path = $this->removeDoubleSlashes("{$this->cache_path}/{$this->relative_path}/{$out_filename}");
+		$this->out_url  = $this->removeDoubleSlashes("{$this->cache_url}/{$this->relative_path}/".urlencode($out_filename));
 	}
 
 	// ------------------------------------------------------------------------
