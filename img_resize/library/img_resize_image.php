@@ -57,9 +57,6 @@ class Img_resize_image {
 	 */
 	public function __construct($image_path, $options = array())
 	{
-		// Set the cache path
-		$this->cache_path = $this->base_path.'/images/resized';
-
 		// Set the image path to the passed path
 		$this->image_path = $image_path;
 
@@ -72,6 +69,12 @@ class Img_resize_image {
 		foreach ($options AS $key => $value)
 		{
 			$this->$key = $value;
+		}
+
+		// Set the cache path if one wasn't passed in the options
+		if ( ! isset($this->cache_path) OR empty($this->cache_path))
+		{
+			$this->cache_path = $this->base_path.'/images/resized';
 		}
 
 		// urldecode the image path if the option was on
@@ -250,7 +253,7 @@ class Img_resize_image {
 		{
 			$this->image = imagecreatefrompng($this->full_path);
 
-		// 	// Make transparency work
+			// Make transparency work
 			imagealphablending($this->out_image, FALSE);
 			imagesavealpha($this->out_image, TRUE);
 		}
@@ -260,7 +263,7 @@ class Img_resize_image {
 		}
 
 
-		// // Copy and resample the source image to the destination image, cropping and resizing at the same time
+		// Copy and resample the source image to the destination image, cropping and resizing at the same time
 		imagecopyresampled($this->out_image, $this->image, $d['out_x'], $d['out_y'], 0, 0, $d['copy_w'], $d['copy_h'], $d['src_w'], $d['src_h']);
 
 		// Sharpen the image if enabled
