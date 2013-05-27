@@ -22,6 +22,9 @@
  * THE SOFTWARE.
  */
 
+// Define __DIR__ for PHP versions < 5.3
+if ( ! defined('__DIR__')) define('__DIR__', dirname(__FILE__));
+
 class Img_resize_image {
 
 	public $return_data;
