@@ -30,12 +30,12 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    2.3.1
+ * @version    2.3.2
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '2.3.1',
+	'pi_version'    => '2.3.2',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
@@ -256,6 +256,10 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
+2.3.2
+
++ Fix an issue with transparent GIFs
+
 2.3.1
 
 + Define __DIR__ for PHP versions < 5.3

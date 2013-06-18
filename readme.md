@@ -66,6 +66,10 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
+2.3.2
+
++ Fix an issue with transparent GIFs
+
 2.3.1
 
 + Define \_\_DIR\_\_ for PHP versions < 5.3
