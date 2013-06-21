@@ -533,10 +533,13 @@ class Img_resize_image {
 		{
 			$is_remote = FALSE;
 
+			// Convert backslashes into forward slashes
+			$this->image_path = str_replace('\\', '/', $this->image_path);
+			$this->base_path  = str_replace('\\', '/', $this->base_path);
+
 			// Trim the trailing slashes off
 			$this->image_path = rtrim($this->image_path, '\\/');
-
-			$this->base_path = rtrim($this->base_path, '\\/');
+			$this->base_path  = rtrim($this->base_path, '\\/');
 
 			if (stripos($this->image_path, $this->base_url) !== FALSE)
 			{
