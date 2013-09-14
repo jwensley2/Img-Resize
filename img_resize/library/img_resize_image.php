@@ -181,7 +181,7 @@ class Img_resize_image {
 			}
 		}
 
-		$tag .= '>';
+		$tag .= ' />';
 
 		return $tag;
 	}
