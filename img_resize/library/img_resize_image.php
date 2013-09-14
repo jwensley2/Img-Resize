@@ -137,7 +137,7 @@ class Img_resize_image {
 		// Check if the destination directory exists, create it if it doesn't
 		if( ! is_dir($this->out_dir))
 		{
-			mkdir($this->out_dir, 0777, TRUE);
+			mkdir($this->out_dir, DIR_WRITE_MODE, TRUE);
 		}
 
 		$cached = $this->isCached();
@@ -363,7 +363,7 @@ class Img_resize_image {
 		// Create the remote directory if it doesn't exist
 		if ( ! is_dir($dir))
 		{
-			mkdir($dir, 0777, TRUE);
+			mkdir($dir, DIR_WRITE_MODE, TRUE);
 		}
 
 		// Store the file if it hasn't been retrieved yet
