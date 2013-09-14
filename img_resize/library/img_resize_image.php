@@ -318,6 +318,11 @@ class Img_resize_image {
 	{
 		$image = new Imagick($this->full_path);
 		$image->setImageCompressionQuality($this->quality); // the default Jpeg quality is 87
+		/**
+		* using progressive Jpeg
+		* @see http://www.yuiblog.com/blog/2008/12/05/imageopt-4/
+		*/
+		$image->setInterlaceScheme(imagick::INTERLACE_PLANE);
 
 		$d = $this->dimensions;
 
