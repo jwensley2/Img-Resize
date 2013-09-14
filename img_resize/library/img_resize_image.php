@@ -317,6 +317,7 @@ class Img_resize_image {
 	private function resizeUsingImagick()
 	{
 		$image = new Imagick($this->full_path);
+		$image->setImageCompressionQuality($this->quality); // the default Jpeg quality is 87
 
 		$d = $this->dimensions;
 
