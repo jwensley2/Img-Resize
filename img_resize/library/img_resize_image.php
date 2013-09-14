@@ -35,6 +35,7 @@ class Img_resize_image {
 	private $cache_url  = '/images/resized/';
 	private $quality    = 100;
 	private $sharpen    = FALSE;
+	private $exif       = FALSE;
 	private $cache      = TRUE;
 	private $urldecode  = TRUE;
 	private $retina     = FALSE;
@@ -334,6 +335,15 @@ class Img_resize_image {
 			$image->sharpenImage(1.5, 1);
 		}
 
+		/**
+		* Clears the EXIF METADATA if disabled
+		* @see http://yuiblog.com/blog/2008/11/14/imageopt-3/
+		*/
+		if (!$this->exif)
+		{
+			$image->stripImage();
+		}
+		
 		$image->writeImage($this->out_path);
 	}
 
