@@ -35,6 +35,7 @@ class Img_resize_image {
 	private $cache_url  = '/images/resized/';
 	private $quality    = 100;
 	private $sharpen    = FALSE;
+	private $exif       = FALSE;
 	private $cache      = TRUE;
 	private $urldecode  = TRUE;
 	private $retina     = FALSE;
@@ -136,7 +137,7 @@ class Img_resize_image {
 		// Check if the destination directory exists, create it if it doesn't
 		if( ! is_dir($this->out_dir))
 		{
-			mkdir($this->out_dir, 0777, TRUE);
+			mkdir($this->out_dir, DIR_WRITE_MODE, TRUE);
 		}
 
 		$cached = $this->isCached();
@@ -180,7 +181,7 @@ class Img_resize_image {
 			}
 		}
 
-		$tag .= '>';
+		$tag .= ' />';
 
 		return $tag;
 	}
@@ -316,6 +317,12 @@ class Img_resize_image {
 	private function resizeUsingImagick()
 	{
 		$image = new Imagick($this->full_path);
+		$image->setImageCompressionQuality($this->quality); // the default Jpeg quality is 87
+		/**
+		* using progressive Jpeg
+		* @see http://www.yuiblog.com/blog/2008/12/05/imageopt-4/
+		*/
+		$image->setInterlaceScheme(imagick::INTERLACE_PLANE);
 
 		$d = $this->dimensions;
 
@@ -334,6 +341,15 @@ class Img_resize_image {
 			$image->sharpenImage(1.5, 1);
 		}
 
+		/**
+		* Clears the EXIF METADATA if disabled
+		* @see http://yuiblog.com/blog/2008/11/14/imageopt-3/
+		*/
+		if (!$this->exif)
+		{
+			$image->stripImage();
+		}
+		
 		$image->writeImage($this->out_path);
 	}
 
@@ -347,7 +363,7 @@ class Img_resize_image {
 		// Create the remote directory if it doesn't exist
 		if ( ! is_dir($dir))
 		{
-			mkdir($dir, 0777, TRUE);
+			mkdir($dir, DIR_WRITE_MODE, TRUE);
 		}
 
 		// Store the file if it hasn't been retrieved yet
