@@ -52,7 +52,7 @@ class Img_resize_image {
 	private $dimensions;
 
 	// Constants
-	const retina_pattern = "/@2x/s";
+	const retina_pattern = "@2x";
 
 	/**
 	 * Constructor
@@ -97,7 +97,7 @@ class Img_resize_image {
 		}
 
 		// Try and read the image
-		if (@fopen($this->full_path, 'r'))
+		if (is_readable($this->full_path))
 		{
 			list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
 		}
@@ -216,14 +216,12 @@ class Img_resize_image {
 	 */
 	public function isRetina()
 	{
-		$match = preg_match(self::retina_pattern, $this->filename);
-
-		if ($match === 1)
+		if ( strpos($this->filename, self::retina_pattern) === FALSE )
 		{
-			return TRUE;
+			return FALSE;
 		}
 
-		return FALSE;
+		return TRUE;
 	}
 
 	// ------------------------------------------------------------------------
@@ -531,9 +529,7 @@ class Img_resize_image {
 
 	private function findPathInfo()
 	{
-		$pattern = "/(((http|ftp|https):\/\/){1}([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)+([\S,:\/\.\?=a-zA-Z0-9_-]+))/is";
-
-		if (preg_match($pattern, $this->image_path, $matches) AND stripos($this->image_path, $this->base_url) === FALSE)
+		if (filter_var($this->image_path, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) AND stripos($this->image_path, $this->base_url) === FALSE)
 		{
 			$url_parts = parse_url($this->image_path);
 			$url_path  = $url_parts['path'];
@@ -592,7 +588,12 @@ class Img_resize_image {
 
 	private function findOutputPaths()
 	{
-		$filename = preg_replace(self::retina_pattern, '', $this->filename);
+		$filename = $this->filename;
+		
+		if (strpos($filename, self::retina_pattern) !== FALSE)
+		{
+			$filename = str_replace(self::retina_pattern, '', $filename);
+		}
 
 		if ($this->retina == FALSE)
 		{
@@ -637,7 +638,7 @@ class Img_resize_image {
 
 	private function removeDoubleSlashes($string)
 	{
-		return preg_replace("#([^/:])/+#", "\\1/", $string);
+		return preg_replace("/(?<!:)\/+/", "/", $string);
 	}
 }
 
