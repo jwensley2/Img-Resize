@@ -97,7 +97,7 @@ class Img_resize_image {
 		}
 
 		// Try and read the image
-		if (@fopen($this->full_path, 'r'))
+		if (is_readable($this->full_path))
 		{
 			list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
 		}
