@@ -42,6 +42,19 @@ $plugin_info = array(
 	'pi_usage'      => Img_resize::usage()
 );
 
+/**
+ * < EE 2.6.0 backward compatibility
+ */
+if (! function_exists('ee'))
+{
+	function ee()
+	{
+		static $EE;
+		if (! $EE) $EE = get_instance();
+		return $EE;
+	}
+}
+
 // Require our image library which does most of the work
 require_once("library/img_resize_image.php");
 
@@ -59,9 +72,9 @@ class Img_resize {
 		// Options
 		$options = array(
 			'base_path'     => FCPATH,
-			'base_url'      => $this->EE->config->item('base_url'),
+			'base_url'      => ee()->config->item('base_url'),
 			'cache_path'    => FCPATH.'/images/resized',
-			'cache_url'     => $this->EE->config->item('base_url').'/images/resized',
+			'cache_url'     => ee()->config->item('base_url').'/images/resized',
 			'cache'         => TRUE,
 			'handle_retina' => TRUE,
 			'just_url'      => FALSE,
@@ -73,15 +86,15 @@ class Img_resize {
 		foreach ($options AS $key => $value)
 		{
 			// Check for a config item
-			if ($this->EE->config->item("img_resize:{$key}"))
+			if (ee()->config->item("img_resize:{$key}"))
 			{
-				$options[$key] = $this->EE->config->item("img_resize:{$key}");
+				$options[$key] = ee()->config->item("img_resize:{$key}");
 			}
 
 			// Check for a tag parameter
-			if ($this->EE->TMPL->fetch_param($key))
+			if (ee()->TMPL->fetch_param($key))
 			{
-				$param = $this->EE->TMPL->fetch_param($key);
+				$param = ee()->TMPL->fetch_param($key);
 
 				switch ($param)
 				{
@@ -101,16 +114,16 @@ class Img_resize {
 		}
 
 		// Get Src and Width/Height Params
-		$src        = $this->EE->TMPL->fetch_param('src');
-		$height     = $this->EE->TMPL->fetch_param('height');
-		$width      = $this->EE->TMPL->fetch_param('width');
-		$max_height = $this->EE->TMPL->fetch_param('max_height');
-		$max_width  = $this->EE->TMPL->fetch_param('max_width');
+		$src        = ee()->TMPL->fetch_param('src');
+		$height     = ee()->TMPL->fetch_param('height');
+		$width      = ee()->TMPL->fetch_param('width');
+		$max_height = ee()->TMPL->fetch_param('max_height');
+		$max_width  = ee()->TMPL->fetch_param('max_width');
 
 		// Is there a source?
 		if ( ! $src)
 		{
-			$this->EE->TMPL->log_item("Img Resize: No source specified");
+			ee()->TMPL->log_item("Img Resize: No source specified");
 			$this->return_data = '';
 			return;
 		}
@@ -118,7 +131,7 @@ class Img_resize {
 		// We need a width or height
 		if ( ! $height AND ! $width AND ! $max_height AND ! $max_width)
 		{
-			$this->EE->TMPL->log_item("Img Resize: No width or height specified");
+			ee()->TMPL->log_item("Img Resize: No width or height specified");
 			$this->return_data = '';
 			return;
 		}
@@ -131,16 +144,16 @@ class Img_resize {
 		} catch (Exception $e) {
 			$message = $e->getMessage();
 
-			$this->EE->TMPL->log_item("Img Resize: {$message}");
+			ee()->TMPL->log_item("Img Resize: {$message}");
 			$this->return_data = '';
 			return;
 		}
 
 		// Tag Attributes
-		$attr['alt']   = $this->EE->TMPL->fetch_param('alt');
-		$attr['title'] = $this->EE->TMPL->fetch_param('title');
-		$attr['class'] = $this->EE->TMPL->fetch_param('class');
-		$attr['id']    = $this->EE->TMPL->fetch_param('id');
+		$attr['alt']   = ee()->TMPL->fetch_param('alt');
+		$attr['title'] = ee()->TMPL->fetch_param('title');
+		$attr['class'] = ee()->TMPL->fetch_param('class');
+		$attr['id']    = ee()->TMPL->fetch_param('id');
 
 		// Resize the image
 		$max    = ($max_width OR $max_height) ? TRUE : FALSE;
@@ -154,9 +167,9 @@ class Img_resize {
 			$rimg_options = $options;
 			$rimg_options['retina'] = TRUE;
 
-			if ($this->EE->TMPL->fetch_param('retina_quality'))
+			if (ee()->TMPL->fetch_param('retina_quality'))
 			{
-				$rimg_options['quality'] = $this->EE->TMPL->fetch_param('retina_quality');
+				$rimg_options['quality'] = ee()->TMPL->fetch_param('retina_quality');
 			}
 
 			$d = $image->getDimensions();
