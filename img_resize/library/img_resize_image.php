@@ -640,7 +640,7 @@ class Img_resize_image {
 
 	private function removeDoubleSlashes($string)
 	{
-		return preg_replace("#([^/:])/+#", "\\1/", $string);
+		return preg_replace("/(?<!:)\/+/", "/", $string);
 	}
 }
 
