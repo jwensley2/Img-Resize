@@ -52,7 +52,7 @@ class Img_resize_image {
 	private $dimensions;
 
 	// Constants
-	const retina_pattern = "/@2x/s";
+	const retina_pattern = "@2x";
 
 	/**
 	 * Constructor
@@ -216,14 +216,12 @@ class Img_resize_image {
 	 */
 	public function isRetina()
 	{
-		$match = preg_match(self::retina_pattern, $this->filename);
-
-		if ($match === 1)
+		if ( strpos($this->filename, self::retina_pattern) === FALSE )
 		{
-			return TRUE;
+			return FALSE;
 		}
 
-		return FALSE;
+		return TRUE;
 	}
 
 	// ------------------------------------------------------------------------
@@ -592,7 +590,12 @@ class Img_resize_image {
 
 	private function findOutputPaths()
 	{
-		$filename = preg_replace(self::retina_pattern, '', $this->filename);
+		$filename = $this->filename;
+		
+		if (strpos($filename, self::retina_pattern) !== FALSE)
+		{
+			$filename = str_replace(self::retina_pattern, '', $filename);
+		}
 
 		if ($this->retina == FALSE)
 		{
