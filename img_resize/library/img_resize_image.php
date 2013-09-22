@@ -529,9 +529,7 @@ class Img_resize_image {
 
 	private function findPathInfo()
 	{
-		$pattern = "/(((http|ftp|https):\/\/){1}([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)+([\S,:\/\.\?=a-zA-Z0-9_-]+))/is";
-
-		if (preg_match($pattern, $this->image_path, $matches) AND stripos($this->image_path, $this->base_url) === FALSE)
+		if (filter_var($this->image_path, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) AND stripos($this->image_path, $this->base_url) === FALSE)
 		{
 			$url_parts = parse_url($this->image_path);
 			$url_path  = $url_parts['path'];
