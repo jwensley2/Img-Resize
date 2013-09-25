@@ -121,7 +121,6 @@ class Img_resize_image {
 	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
 	{
 
-		$this->calculateDimensions($width, $height, $max);
 		$this->findOutputPaths();
 
 		// Check if the destination directory exists, create it if it doesn't
@@ -143,6 +142,8 @@ class Img_resize_image {
 			{
 				throw new Exception("Could not open image file - {$this->full_path}", 1);
 			}
+
+			$this->calculateDimensions($width, $height, $max);
 			if ($method === 'Imagick' AND class_exists("Imagick"))
 			{
 				$this->resizeUsingImagick();
