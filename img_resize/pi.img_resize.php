@@ -136,18 +136,8 @@ class Img_resize {
 			return;
 		}
 
-		// Try to create an image
-		try {
-			$img_options = $options;
-
-			$image = new Img_resize_image($src, $img_options);
-		} catch (Exception $e) {
-			$message = $e->getMessage();
-
-			ee()->TMPL->log_item("Img Resize: {$message}");
-			$this->return_data = '';
-			return;
-		}
+		$img_options = $options;
+		$image = new Img_resize_image($src, $img_options);
 
 		// Tag Attributes
 		$attr['alt']   = ee()->TMPL->fetch_param('alt');
@@ -159,7 +149,17 @@ class Img_resize {
 		$max    = ($max_width OR $max_height) ? TRUE : FALSE;
 		$width  = ($max_width) ? $max_width : $width;
 		$height = ($max_height) ? $max_height : $height;
-		$image->resize($width, $height, $max);
+
+		// Try to create an image
+		try {
+			$image->resize($width, $height, $max);
+		} catch (Exception $e) {
+			$message = $e->getMessage();
+
+			ee()->TMPL->log_item("Img Resize: {$message}");
+			$this->return_data = '';
+			return;
+		}
 
 		// Handle retina images
 		if ($image->isRetina() AND $options['handle_retina'] === TRUE)

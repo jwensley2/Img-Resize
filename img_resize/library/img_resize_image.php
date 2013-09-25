@@ -95,16 +95,6 @@ class Img_resize_image {
 		{
 			$this->getRemote();
 		}
-
-		// Try and read the image
-		if (is_readable($this->full_path))
-		{
-			list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
-		}
-		else
-		{
-			throw new Exception("Could not open image file - {$this->full_path}", 1);
-		}
 	}
 
 	// ------------------------------------------------------------------------
@@ -144,6 +134,15 @@ class Img_resize_image {
 
 		if ( ! $cached OR $this->cache === FALSE)
 		{
+			// Try and read the image
+			if (is_readable($this->full_path))
+			{
+				list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
+			}
+			else
+			{
+				throw new Exception("Could not open image file - {$this->full_path}", 1);
+			}
 			if ($method === 'Imagick' AND class_exists("Imagick"))
 			{
 				$this->resizeUsingImagick();
