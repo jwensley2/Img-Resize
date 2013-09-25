@@ -386,12 +386,13 @@ class Img_resize_image {
 
 	private function isCached()
 	{
-		if (file_exists($this->out_path) AND $this->is_remote)
+		if (file_exists($this->out_path))
 		{
-			return TRUE;
-		}
-		elseif (file_exists($this->out_path) AND filemtime($this->out_path) > filemtime($this->full_path))
-		{
+			if ($this->is_remote === FALSE AND filemtime($this->out_path) < filemtime($this->full_path))
+			{
+				return FALSE;
+			}
+
 			return TRUE;
 		}
 
