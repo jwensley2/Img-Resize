@@ -348,6 +348,7 @@ class Img_resize_image {
 		}
 
 		$image->writeImage($this->out_path);
+		$image->destroy();
 	}
 
 	// ------------------------------------------------------------------------
