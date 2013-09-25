@@ -120,7 +120,8 @@ class Img_resize_image {
 	 */
 	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
 	{
-
+		$this->out_width = floor($width);
+		$this->out_height = floor($height);
 		$this->findOutputPaths();
 
 		// Check if the destination directory exists, create it if it doesn't
@@ -509,8 +510,8 @@ class Img_resize_image {
 		$dimensions['out_y']  = $out_y;
 		$dimensions['src_x']  = $src_x;
 		$dimensions['src_y']  = $src_y;
-		$dimensions['out_w']  = $this->out_width  = floor($out_w);
-		$dimensions['out_h']  = $this->out_height = floor($out_h);
+		$dimensions['out_w']  = floor($out_w);
+		$dimensions['out_h']  = floor($out_h);
 		$dimensions['copy_w'] = floor($copy_w);
 		$dimensions['copy_h'] = floor($copy_h);
 		$dimensions['src_w']  = $src_w;
