@@ -347,7 +347,7 @@ class Img_resize_image {
 		{
 			$image->stripImage();
 		}
-		
+
 		$image->writeImage($this->out_path);
 	}
 
@@ -589,7 +589,7 @@ class Img_resize_image {
 	private function findOutputPaths()
 	{
 		$filename = $this->filename;
-		
+
 		if (strpos($filename, self::retina_pattern) !== FALSE)
 		{
 			$filename = str_replace(self::retina_pattern, '', $filename);
