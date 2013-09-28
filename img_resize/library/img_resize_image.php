@@ -95,16 +95,6 @@ class Img_resize_image {
 		{
 			$this->getRemote();
 		}
-
-		// Try and read the image
-		if (is_readable($this->full_path))
-		{
-			list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
-		}
-		else
-		{
-			throw new Exception("Could not open image file - {$this->full_path}", 1);
-		}
 	}
 
 	// ------------------------------------------------------------------------
@@ -130,8 +120,8 @@ class Img_resize_image {
 	 */
 	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
 	{
-
-		$this->calculateDimensions($width, $height, $max);
+		$this->out_width = floor($width);
+		$this->out_height = floor($height);
 		$this->findOutputPaths();
 
 		// Check if the destination directory exists, create it if it doesn't
@@ -144,6 +134,17 @@ class Img_resize_image {
 
 		if ( ! $cached OR $this->cache === FALSE)
 		{
+			// Try and read the image
+			if (is_readable($this->full_path))
+			{
+				list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
+			}
+			else
+			{
+				throw new Exception("Could not open image file - {$this->full_path}", 1);
+			}
+
+			$this->calculateDimensions($width, $height, $max);
 			if ($method === 'Imagick' AND class_exists("Imagick"))
 			{
 				$this->resizeUsingImagick();
@@ -347,8 +348,9 @@ class Img_resize_image {
 		{
 			$image->stripImage();
 		}
-		
+
 		$image->writeImage($this->out_path);
+		$image->destroy();
 	}
 
 	// ------------------------------------------------------------------------
@@ -387,12 +389,13 @@ class Img_resize_image {
 
 	private function isCached()
 	{
-		if (file_exists($this->out_path) AND $this->is_remote)
+		if (file_exists($this->out_path))
 		{
-			return TRUE;
-		}
-		elseif (file_exists($this->out_path) AND filemtime($this->out_path) > filemtime($this->full_path))
-		{
+			if ($this->is_remote === FALSE AND filemtime($this->out_path) < filemtime($this->full_path))
+			{
+				return FALSE;
+			}
+
 			return TRUE;
 		}
 
@@ -507,8 +510,8 @@ class Img_resize_image {
 		$dimensions['out_y']  = $out_y;
 		$dimensions['src_x']  = $src_x;
 		$dimensions['src_y']  = $src_y;
-		$dimensions['out_w']  = $this->out_width  = floor($out_w);
-		$dimensions['out_h']  = $this->out_height = floor($out_h);
+		$dimensions['out_w']  = floor($out_w);
+		$dimensions['out_h']  = floor($out_h);
 		$dimensions['copy_w'] = floor($copy_w);
 		$dimensions['copy_h'] = floor($copy_h);
 		$dimensions['src_w']  = $src_w;
@@ -589,7 +592,7 @@ class Img_resize_image {
 	private function findOutputPaths()
 	{
 		$filename = $this->filename;
-		
+
 		if (strpos($filename, self::retina_pattern) !== FALSE)
 		{
 			$filename = str_replace(self::retina_pattern, '', $filename);
