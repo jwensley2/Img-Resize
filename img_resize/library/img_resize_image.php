@@ -25,6 +25,9 @@
 // Define __DIR__ for PHP versions < 5.3
 if ( ! defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
+// Define DIR_WRITE_MODE for usage outside EE
+if ( ! defined('DIR_WRITE_MODE')) define('DIR_WRITE_MODE', 0777);
+
 class Img_resize_image {
 
 	public $return_data;
@@ -50,6 +53,7 @@ class Img_resize_image {
 	private $out_url;
 	private $out_width;
 	private $dimensions;
+	private $resize_params;
 
 	// Constants
 	const retina_pattern = "@2x";
@@ -120,6 +124,12 @@ class Img_resize_image {
 	 */
 	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
 	{
+		$this->resize_params = array(
+			'width'  => $width,
+			'height' => $height,
+			'max'    => $max
+		);
+
 		$this->out_width = floor($width);
 		$this->out_height = floor($height);
 		$this->findOutputPaths();
@@ -145,6 +155,7 @@ class Img_resize_image {
 			}
 
 			$this->calculateDimensions($width, $height, $max);
+
 			if ($method === 'Imagick' AND class_exists("Imagick"))
 			{
 				$this->resizeUsingImagick();
@@ -202,10 +213,18 @@ class Img_resize_image {
 
 	/**
 	 * Return the dimensions
+	 * Must be called after resize()
 	 * @return array The dimensions
 	 */
 	public function getDimensions()
 	{
+		if ( ! $this->dimensions)
+		{
+			list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
+
+			$this->calculateDimensions($this->resize_params['width'], $this->resize_params['height'], $this->resize_params['max']);
+		}
+
 		return $this->dimensions;
 	}
 
