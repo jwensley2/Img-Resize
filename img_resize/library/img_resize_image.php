@@ -124,14 +124,17 @@ class Img_resize_image {
 	 */
 	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
 	{
-		$this->resize_params = array(
-			'width'  => $width,
-			'height' => $height,
-			'max'    => $max
-		);
+		// Try and read the image
+		if (is_readable($this->full_path))
+		{
+			list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
+		}
+		else
+		{
+			throw new Exception("Could not open image file - {$this->full_path}", 1);
+		}
 
-		$this->out_width = floor($width);
-		$this->out_height = floor($height);
+		$this->calculateDimensions($width, $height, $max);
 		$this->findOutputPaths();
 
 		// Check if the destination directory exists, create it if it doesn't
@@ -144,18 +147,6 @@ class Img_resize_image {
 
 		if ( ! $cached OR $this->cache === FALSE)
 		{
-			// Try and read the image
-			if (is_readable($this->full_path))
-			{
-				list($this->width, $this->height, $this->image_type) = getimagesize($this->full_path);
-			}
-			else
-			{
-				throw new Exception("Could not open image file - {$this->full_path}", 1);
-			}
-
-			$this->calculateDimensions($width, $height, $max);
-
 			if ($method === 'Imagick' AND class_exists("Imagick"))
 			{
 				$this->resizeUsingImagick();
@@ -529,8 +520,8 @@ class Img_resize_image {
 		$dimensions['out_y']  = $out_y;
 		$dimensions['src_x']  = $src_x;
 		$dimensions['src_y']  = $src_y;
-		$dimensions['out_w']  = floor($out_w);
-		$dimensions['out_h']  = floor($out_h);
+		$dimensions['out_w']  = $this->out_width  = floor($out_w);
+		$dimensions['out_h']  = $this->out_height = floor($out_h);
 		$dimensions['copy_w'] = floor($copy_w);
 		$dimensions['copy_h'] = floor($copy_h);
 		$dimensions['src_w']  = $src_w;
