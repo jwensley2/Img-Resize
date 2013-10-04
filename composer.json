@@ -1,0 +1,13 @@
+{
+    "name": "jwensley/img-resize",
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    },
+    "license" : "MIT",
+    "authors": [
+        {
+            "name": "Joseph Wensley",
+            "email": "joseph@exclaimsolutions.com"
+        }
+    ]
+}
