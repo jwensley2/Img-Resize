@@ -277,13 +277,16 @@ class Img_resize_image {
 			// Find the transparet color from the old image
 			$tindex = imagecolortransparent($this->image);
 
-			// Get the colors for the index and allocate a new index in the resized image
-			$tcolor = imagecolorsforindex($this->out_image, $tindex);
-			$tindex = imagecolorallocate($this->out_image, $tcolor['red'], $tcolor['green'], $tcolor['blue']);
+			if ($tindex !== -1)
+			{
+				// Get the colors for the index and allocate a new index in the resized image
+				$tcolor = imagecolorsforindex($this->out_image, $tindex);
+				$tindex = imagecolorallocate($this->out_image, $tcolor['red'], $tcolor['green'], $tcolor['blue']);
 
-			// Fill with the background color then make it transparent
-			imagefill($this->out_image, 0, 0, $tindex);
-			imagecolortransparent($this->out_image, $tindex);
+				// Fill with the background color then make it transparent
+				imagefill($this->out_image, 0, 0, $tindex);
+				imagecolortransparent($this->out_image, $tindex);
+			}
 		}
 
 
