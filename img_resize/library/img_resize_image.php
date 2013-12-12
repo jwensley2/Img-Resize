@@ -545,15 +545,17 @@ class Img_resize_image {
 
 	private function findPathInfo()
 	{
-		if (filter_var($this->image_path, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) AND stripos($this->image_path, $this->base_url) === FALSE)
+		$pattern = "/(((http|ftp|https):\/\/){1}([a-zA-Z0-9_-]+)(\.[a-zA-Z0-9_-]+)+([\S,:\/\.\?=a-zA-Z0-9_-]+))/is";
+
+		if (preg_match($pattern, $this->image_path, $matches) AND stripos($this->image_path, $this->base_url) === FALSE)
 		{
 			$url_parts = parse_url($this->image_path);
 			$url_path  = $url_parts['path'];
 
 			$path_parts    = pathinfo($url_path);
-			$filename      = $path_parts['filename'];
-			$extension     = $path_parts['extension'];
-			$relative_path = $this->removeDoubleSlashes($url_parts['host'].'/'.$path_parts['dirname']);
+			$filename      = sha1($path_parts['dirname'].$path_parts['filename']);
+			$extension     = isset($path_parts['extension']) ? $path_parts['extension'] : NULL;
+			$relative_path = $this->removeDoubleSlashes($url_parts['host']);
 			$full_path     = $this->image_path;
 			$is_remote     = TRUE;
 		}
@@ -579,7 +581,7 @@ class Img_resize_image {
 			{
 				$parts         = pathinfo($this->image_path);
 				$filename      = $parts['filename'];
-				$extension     = $parts['extension'];
+				$extension     = isset($parts['extension']) ? $parts['extension'] : NULL;
 				$relative_path = $parts['dirname'];
 				$full_path     = $this->removeDoubleSlashes($this->base_path.'/'.$this->image_path);
 			}
@@ -587,7 +589,7 @@ class Img_resize_image {
 			{
 				$parts         = pathinfo(str_replace($this->base_path, '/', $this->image_path));
 				$filename      = $parts['filename'];
-				$extension     = $parts['extension'];
+				$extension     = isset($parts['extension']) ? $parts['extension'] : NULL;
 				$relative_path = $parts['dirname'];
 				$full_path     = $this->image_path;
 			}
@@ -611,13 +613,30 @@ class Img_resize_image {
 			$filename = str_replace(self::retina_pattern, '', $filename);
 		}
 
+		$extension = $this->extension;
+
+		if ( ! isset($this->extension) OR empty($this->extension))
+		{
+			switch ($this->image_type) {
+				case IMAGETYPE_JPEG:
+					$extension = 'jpg';
+					break;
+				case IMAGETYPE_PNG:
+					$extension = 'png';
+					break;
+				case IMAGETYPE_GIF:
+					$extension = 'gif';
+					break;
+			}
+		}
+
 		if ($this->retina == FALSE)
 		{
-			$out_filename = "{$filename}_{$this->out_width}x{$this->out_height}.{$this->extension}";
+			$out_filename = "{$filename}_{$this->out_width}x{$this->out_height}.{$extension}";
 		}
 		else
 		{
-			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2)."@2x.{$this->extension}";
+			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2)."@2x.{$extension}";
 		}
 
 		$this->out_dir  = $this->removeDoubleSlashes("{$this->cache_path}/{$this->relative_path}");
