@@ -17,7 +17,7 @@ The src and at least 1 dimension parameter are required
 
 Optional
 ---------
-The following options can also be set globaly in a config file using like $config['img_resize:param'] = 'VALUE'
+The following options can also be set globaly in a config file using like `$config['img_resize:param'] = 'VALUE'`
 
 **quality:** The quality of the resized image between 0-100. Default is 100.  
 **retina\_quality:** The quality of the resized retina image between 0-100. Defaults to whatever **quality** is.  
@@ -55,10 +55,10 @@ Example Usage
 
 Retina Handling
 ===============
-If you have a 100x100 image named like image@2x.png and resize to 25x25 the plugin will generate two images.
+If you have a 100x100 image named like `image@2x.png` and resize to 25x25 the plugin will generate two images.
 
-The first image will be 25x25 and named like image\_25x25.png  
-The second image will be 50x50 and named like image\_25x25@2x.png
+The first image will be 25x25 and named like `image_25x25.png`
+The second image will be 50x50 and named like `image_25x25@2x.png`
 
 This should provide support for many retina handling methods that use @2x as an identifer, like http://retinajs.com/.
 
