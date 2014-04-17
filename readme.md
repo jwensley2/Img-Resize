@@ -21,8 +21,8 @@ The following options can also be set globaly in a config file using like `$conf
 
 **quality:** The quality of the resized image between 0-100. Default is 100.  
 **retina\_quality:** The quality of the resized retina image between 0-100. Defaults to whatever **quality** is.  
-**just\_url:** Set this to 'no' to only return the URL to the image  
-**sharpen:** Setting this to 'no' will cause images to be sharpened after they are resized  
+**just\_url:** Set this to 'yes' to only return the URL to the image  
+**sharpen:** Setting this to 'yes' will cause images to be sharpened after they are resized  
 **urldecode:** Setting to 'no' will disable decoding of the src url  
 **handle_retina:** Set to 'no' to disable
 
