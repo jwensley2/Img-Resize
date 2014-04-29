@@ -124,7 +124,7 @@ class Img_resize_image {
 	 * @param  string  $method  The resizing method to use (Imagick or GD)
 	 * @return object           A copy of the object to allow chaining
 	 */
-	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
+	public function resize($width, $height, $max = FALSE, $h_align, $v_align, $method = 'Imagick')
 	{
 		// Try and read the image
 		if (is_readable($this->full_path))
