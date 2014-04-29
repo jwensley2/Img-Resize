@@ -54,6 +54,8 @@ class Img_resize_image {
 	private $out_width;
 	private $dimensions;
 	private $resize_params;
+	private $h_align    = 50;
+	private $v_align    = 50;
 
 	// Constants
 	const retina_pattern = "@2x";
