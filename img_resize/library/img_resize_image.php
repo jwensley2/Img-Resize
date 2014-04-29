@@ -523,16 +523,16 @@ class Img_resize_image {
 
 		if ($rw > $rh)
 		{
-			$out_x = -(($copy_w - $out_w) / 2);
+			$out_x = -(($copy_w - $out_w) * ($this->h_align / 100));
 		}
 
 		if ($rw < $rh)
 		{
-			$out_y = -(($copy_h - $out_h) / 2);
+			$out_y = -(($copy_h - $out_h) * ($this->v_align / 100));
 		}
 
-		$dimensions['out_x']  = $out_x;
-		$dimensions['out_y']  = $out_y;
+		$dimensions['out_x']  = floor($out_x);
+		$dimensions['out_y']  = floor($out_y);
 		$dimensions['src_x']  = $src_x;
 		$dimensions['src_y']  = $src_y;
 		$dimensions['out_w']  = $this->out_width  = floor($out_w);
