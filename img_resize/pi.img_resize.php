@@ -119,6 +119,8 @@ class Img_resize {
 		$width      = ee()->TMPL->fetch_param('width');
 		$max_height = ee()->TMPL->fetch_param('max_height');
 		$max_width  = ee()->TMPL->fetch_param('max_width');
+		$h_align    = ee()->TMPL->fetch_param('h_align');
+		$v_align    = ee()->TMPL->fetch_param('v_align');
 
 		// Is there a source?
 		if ( ! $src)
@@ -152,7 +154,7 @@ class Img_resize {
 
 		// Try to create an image
 		try {
-			$image->resize($width, $height, $max);
+			$image->resize($width, $height, $max, $h_align, $v_align);
 		} catch (Exception $e) {
 			$message = $e->getMessage();
 
