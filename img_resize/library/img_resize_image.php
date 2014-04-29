@@ -136,6 +136,16 @@ class Img_resize_image {
 			throw new Exception("Could not open image file - {$this->full_path}", 1);
 		}
 
+		if ( is_numeric($h_align) AND $h_align >= 0  AND $h_align <= 100 )
+		{
+			$this->h_align = $h_align;
+		}
+
+		if ( is_numeric($v_align) AND $v_align >= 0 AND $v_align <= 100 )
+		{
+			$this->v_align = $v_align;
+		}
+
 		$this->calculateDimensions($width, $height, $max);
 		$this->findOutputPaths();
 
