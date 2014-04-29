@@ -25,7 +25,7 @@ The following options can also be set globaly in a config file using like `$conf
 **sharpen:** Setting this to 'no' will cause images to be sharpened after they are resized  
 **urldecode:** Setting to 'no' will disable decoding of the src url  
 **handle_retina:** Set to 'no' to disable  
-**h\_align** and/or **h\_align** Adjusts where the crop is done from, default is 50 (center of the image)
+**h\_align** and/or **v\_align** Adjusts where the crop is done from, default is 50 (center of the image)
 
 **These should only be set if you know what you are doing**  
 **base\_url:** URL to where your images are stored, default is your base_url  
