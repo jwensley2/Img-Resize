@@ -1,5 +1,9 @@
 Changelog
 =========
+2.5.0
+
++ Added h\_align and v\_align parameters (thanks @robsonsobral)
+
 2.4.0
 
 + Miscellaneous fixes and improvements under the hood

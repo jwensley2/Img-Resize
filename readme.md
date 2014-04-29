@@ -12,8 +12,8 @@ Required
 The src and at least 1 dimension parameter are required
 
 **src:** Path to the image can be a full or relative (to the index.php) system path or a local url  
-**width and/or height:** Absolute width or height to resize to  
-**max\_width and/or max\_height:** Maximum width or height to resize to  
+**width** and/or **height:** Absolute width or height to resize to  
+**max\_width** and/or **max\_height:** Maximum width or height to resize to  
 
 Optional
 ---------
@@ -24,7 +24,8 @@ The following options can also be set globaly in a config file using like `$conf
 **just\_url:** Set this to 'no' to only return the URL to the image  
 **sharpen:** Setting this to 'no' will cause images to be sharpened after they are resized  
 **urldecode:** Setting to 'no' will disable decoding of the src url  
-**handle_retina:** Set to 'no' to disable
+**handle_retina:** Set to 'no' to disable  
+**h\_align** and/or **h\_align** Adjusts where the crop is done from, default is 50 (center of the image)
 
 **These should only be set if you know what you are doing**  
 **base\_url:** URL to where your images are stored, default is your base_url  

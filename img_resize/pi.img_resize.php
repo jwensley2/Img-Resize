@@ -30,12 +30,12 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    2.4.0
+ * @version    2.5.0
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '2.4.0',
+	'pi_version'    => '2.5.0',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
@@ -217,8 +217,8 @@ Required
 The src and at least 1 dimension parameter are required
 
 **src:** Path to the image can be a full or relative (to the index.php) system path or a local url
-**width and/or height:** Absolute width or height to resize to
-**max_width and/or max_height:** Maximum width or height to resize to
+**width** and/or **height:** Absolute width or height to resize to
+**max_width** and/or **max_height:** Maximum width or height to resize to
 
 Optional
 ---------
@@ -230,6 +230,7 @@ The following options can also be set globaly in a config file using like $confi
 **sharpen:** Setting this to 'no' will cause images to be sharpened after they are resized
 **urldecode:** Setting to 'no' will disable decoding of the src url
 **handle_retina:** Set to 'no' to disable
+**h_align** and/or **h_align** Adjusts where the crop is done from, default is 50 (center of the image)
 
 **These should only be set if you know what you are doing**
 **base_url:** URL to where your images are stored, default is your base_url
