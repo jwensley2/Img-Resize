@@ -620,6 +620,18 @@ class Img_resize_image {
 	{
 		$filename = $this->filename;
 
+		$h_align_name =
+		$v_align_name = '';
+
+		// to avoid recreate files cached by previous versions
+		// we just add the align parameters to the filenames
+		// if they aren't default
+		if ( $this->h_align != 50 OR $this->v_align != 50 )
+		{
+			$h_align_name = '_' . $this->h_align;
+			$v_align_name = '_' . $this->v_align;
+		}
+
 		if (strpos($filename, self::retina_pattern) !== FALSE)
 		{
 			$filename = str_replace(self::retina_pattern, '', $filename);
@@ -644,11 +656,11 @@ class Img_resize_image {
 
 		if ($this->retina == FALSE)
 		{
-			$out_filename = "{$filename}_{$this->out_width}x{$this->out_height}.{$extension}";
+			$out_filename = "{$filename}_{$this->out_width}x{$this->out_height}{$h_align_name}{$v_align_name}.{$extension}";
 		}
 		else
 		{
-			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2)."@2x.{$extension}";
+			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2).$h_align_name.$v_align_name."@2x.{$extension}";
 		}
 
 		$this->out_dir  = $this->removeDoubleSlashes("{$this->cache_path}/{$this->relative_path}");
