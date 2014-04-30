@@ -112,4 +112,40 @@ class ImgResizeImageTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals(250, $d['out_w']);
 		$this->assertEquals(250, $d['out_h']);
 	}
+
+	public function testResizeByHeight()
+	{
+		// 250x500 image
+		$image = Img_resize_image::load($this->sources[0], $this->options);
+
+		$d = $image->resize(NULL, 500)->getDimensions();
+		$this->assertEquals(250, $d['out_w']);
+		$this->assertEquals(500, $d['out_h']);
+
+		$d = $image->resize(NULL, 250)->getDimensions();
+		$this->assertEquals(125, $d['out_w']);
+		$this->assertEquals(250, $d['out_h']);
+
+		// 500x250 image
+		$image = Img_resize_image::load($this->sources[1], $this->options);
+
+		$d = $image->resize(NULL, 500)->getDimensions();
+		$this->assertEquals(1000, $d['out_w']);
+		$this->assertEquals(500, $d['out_h']);
+
+		$d = $image->resize(NULL, 250)->getDimensions();
+		$this->assertEquals(500, $d['out_w']);
+		$this->assertEquals(250, $d['out_h']);
+
+		// 500x500 image
+		$image = Img_resize_image::load($this->sources[2], $this->options);
+
+		$d = $image->resize(NULL, 500)->getDimensions();
+		$this->assertEquals(500, $d['out_w']);
+		$this->assertEquals(500, $d['out_h']);
+
+		$d = $image->resize(NULL, 250)->getDimensions();
+		$this->assertEquals(250, $d['out_w']);
+		$this->assertEquals(250, $d['out_h']);
+	}
 }
