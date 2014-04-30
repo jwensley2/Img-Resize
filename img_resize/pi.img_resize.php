@@ -30,12 +30,12 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    2.3.2
+ * @version    2.5.0
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '2.3.2',
+	'pi_version'    => '2.5.0',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',
@@ -119,6 +119,8 @@ class Img_resize {
 		$width      = ee()->TMPL->fetch_param('width');
 		$max_height = ee()->TMPL->fetch_param('max_height');
 		$max_width  = ee()->TMPL->fetch_param('max_width');
+		$h_align    = ee()->TMPL->fetch_param('h_align');
+		$v_align    = ee()->TMPL->fetch_param('v_align');
 
 		// Is there a source?
 		if ( ! $src)
@@ -152,7 +154,7 @@ class Img_resize {
 
 		// Try to create an image
 		try {
-			$image->resize($width, $height, $max);
+			$image->resize($width, $height, $max, $h_align, $v_align);
 		} catch (Exception $e) {
 			$message = $e->getMessage();
 
@@ -215,8 +217,8 @@ Required
 The src and at least 1 dimension parameter are required
 
 **src:** Path to the image can be a full or relative (to the index.php) system path or a local url
-**width and/or height:** Absolute width or height to resize to
-**max_width and/or max_height:** Maximum width or height to resize to
+**width** and/or **height:** Absolute width or height to resize to
+**max_width** and/or **max_height:** Maximum width or height to resize to
 
 Optional
 ---------
@@ -228,6 +230,7 @@ The following options can also be set globaly in a config file using like $confi
 **sharpen:** Setting this to 'no' will cause images to be sharpened after they are resized
 **urldecode:** Setting to 'no' will disable decoding of the src url
 **handle_retina:** Set to 'no' to disable
+**h_align** and/or **v_align** Adjusts where the crop is done from, default is 50 (center of the image)
 
 **These should only be set if you know what you are doing**
 **base_url:** URL to where your images are stored, default is your base_url
@@ -269,60 +272,8 @@ A data-retina attribute will also be set on the img tag containing the url to th
 
 Changelog
 =========
-2.3.2
+View changelog at https://github.com/jwensley2/Img-Resize
 
-+ Fix an issue with transparent GIFs
-
-2.3.1
-
-+ Define __DIR__ for PHP versions < 5.3
-
-2.3.0
-
-+ Added retina_quality parameter so you can seperately set the retina image quality if desired
-
-2.2.0
-
-+ Improve handling of remote images, should be much faster now
-
-2.1.1
-
-+ Fix a bug that could cause retina images could be sized and named wrong
-
-2.1.0
-
-+ Should no longer load images on the same domain as if they were remote when using full urls
-+ Added base_url paremeter that you can set if you're images are on a sub-domain or something similar to make them load from the filesystem instead of remotely
-+ Fix a bug with max_width and max_height
-
-2.0.0
-
-+ Updating to this version may break things for you, be sure to test on a non-live site.
-+ Add support for retina images, if an image is named with @2x the plugin will generate both retina and non-retina versions.
-+ Added the ability to set some options in a config file
-+ Remove dir param
-+ Refactored most of the heavy lifting code into a seperate class
-
-1.2.1
-
-+ Change a setting when resizing using Imagick that caused inconsistent behaviour between it and GD
-
-1.2.0
-
-+ Attempt to increase memory limit before resizing
-+ Add urldecode parameter
-+ Suppress fopen errors
-+ Bugfixes
-
-1.1.1
-
-+ Add GIF support
-+ Bugfix
-
-1.1.0
-
-+ Add option to sharpen images after resizing
-+ Use Imagick if available
 <?php
 		$buffer = ob_get_contents();
 		ob_end_clean();

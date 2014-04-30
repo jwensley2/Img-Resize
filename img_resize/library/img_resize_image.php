@@ -54,6 +54,8 @@ class Img_resize_image {
 	private $out_width;
 	private $dimensions;
 	private $resize_params;
+	private $h_align    = 50;
+	private $v_align    = 50;
 
 	// Constants
 	const retina_pattern = "@2x";
@@ -122,7 +124,7 @@ class Img_resize_image {
 	 * @param  string  $method  The resizing method to use (Imagick or GD)
 	 * @return object           A copy of the object to allow chaining
 	 */
-	public function resize($width, $height, $max = FALSE, $method = 'Imagick')
+	public function resize($width, $height, $max = FALSE, $h_align, $v_align, $method = 'Imagick')
 	{
 		// Try and read the image
 		if (is_readable($this->full_path))
@@ -132,6 +134,16 @@ class Img_resize_image {
 		else
 		{
 			throw new Exception("Could not open image file - {$this->full_path}", 1);
+		}
+
+		if ( is_numeric($h_align) AND $h_align >= 0  AND $h_align <= 100 )
+		{
+			$this->h_align = $h_align;
+		}
+
+		if ( is_numeric($v_align) AND $v_align >= 0 AND $v_align <= 100 )
+		{
+			$this->v_align = $v_align;
 		}
 
 		$this->calculateDimensions($width, $height, $max);
@@ -511,16 +523,16 @@ class Img_resize_image {
 
 		if ($rw > $rh)
 		{
-			$out_x = -(($copy_w - $out_w) / 2);
+			$out_x = -(($copy_w - $out_w) * ($this->h_align / 100));
 		}
 
 		if ($rw < $rh)
 		{
-			$out_y = -(($copy_h - $out_h) / 2);
+			$out_y = -(($copy_h - $out_h) * ($this->v_align / 100));
 		}
 
-		$dimensions['out_x']  = $out_x;
-		$dimensions['out_y']  = $out_y;
+		$dimensions['out_x']  = floor($out_x);
+		$dimensions['out_y']  = floor($out_y);
 		$dimensions['src_x']  = $src_x;
 		$dimensions['src_y']  = $src_y;
 		$dimensions['out_w']  = $this->out_width  = floor($out_w);
@@ -608,6 +620,18 @@ class Img_resize_image {
 	{
 		$filename = $this->filename;
 
+		$h_align_name =
+		$v_align_name = '';
+
+		// to avoid recreate files cached by previous versions
+		// we just add the align parameters to the filenames
+		// if they aren't default
+		if ( $this->h_align != 50 OR $this->v_align != 50 )
+		{
+			$h_align_name = '_' . $this->h_align;
+			$v_align_name = '_' . $this->v_align;
+		}
+
 		if (strpos($filename, self::retina_pattern) !== FALSE)
 		{
 			$filename = str_replace(self::retina_pattern, '', $filename);
@@ -632,11 +656,11 @@ class Img_resize_image {
 
 		if ($this->retina == FALSE)
 		{
-			$out_filename = "{$filename}_{$this->out_width}x{$this->out_height}.{$extension}";
+			$out_filename = "{$filename}_{$this->out_width}x{$this->out_height}{$h_align_name}{$v_align_name}.{$extension}";
 		}
 		else
 		{
-			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2)."@2x.{$extension}";
+			$out_filename = "{$filename}_".($this->out_width / 2).'x'.($this->out_height / 2).$h_align_name.$v_align_name."@2x.{$extension}";
 		}
 
 		$this->out_dir  = $this->removeDoubleSlashes("{$this->cache_path}/{$this->relative_path}");
