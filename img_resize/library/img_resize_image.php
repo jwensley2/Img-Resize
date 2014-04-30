@@ -182,7 +182,7 @@ class Img_resize_image {
 	 */
 	public function buildTag($attributes = array())
 	{
-		$tag = '<img ';
+		$attr = array();
 
 		$attributes['width']  = $this->out_width;
 		$attributes['height'] = $this->out_height;
@@ -192,13 +192,11 @@ class Img_resize_image {
 		{
 			if ( ! empty($value))
 			{
-				$tag .= "{$key}=\"$value\" ";
+				$attr[] = "{$key}=\"$value\"";
 			}
 		}
 
-		$tag .= ' />';
-
-		return $tag;
+		return sprintf('<img %s />', implode($attr, ' '));
 	}
 
 	// ------------------------------------------------------------------------
