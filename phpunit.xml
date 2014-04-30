@@ -1,0 +1,7 @@
+<phpunit>
+	<testsuites>
+		<testsuite name="Img_resize">
+			<directory>tests</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
