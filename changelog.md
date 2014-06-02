@@ -1,5 +1,9 @@
 Changelog
 =========
+2.5.1
+
++ Get v\_align and h\_align to work with imagick
+
 2.5.0
 
 + Added h\_align and v\_align parameters (thanks @robsonsobral)

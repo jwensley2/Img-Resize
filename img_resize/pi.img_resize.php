@@ -30,12 +30,12 @@
  * @category   Plugin
  * @author     Joseph Wensley
  * @link       http://josephwensley.com
- * @version    2.5.0
+ * @version    2.5.1
  */
 
 $plugin_info = array(
 	'pi_name'       => 'Img Resize',
-	'pi_version'    => '2.5.0',
+	'pi_version'    => '2.5.1',
 	'pi_author'     => 'Joseph Wensley',
 	'pi_author_url' => 'http://josephwensley.com',
 	'pi_description'=> 'Resizes images',

@@ -350,7 +350,11 @@ class Img_resize_image {
 
 		if ($d['crop'])
 		{
-			$image->cropThumbnailImage($d['out_w'], $d['out_h']);
+			// Calculate crop coordinates
+			$x = ($d['src_w'] - $d['out_w']) * ($this->h_align / 100);
+			$y = ($d['src_h'] - $d['out_h']) * ($this->v_align / 100);
+
+			$image->cropImage($d['out_w'], $d['out_h'], $x, $y);
 		}
 		else
 		{
